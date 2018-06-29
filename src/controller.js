@@ -15,15 +15,6 @@ export class RestApiHelper {
 		RestApiHelper._config = config;
 	}
 
-	static _decorate(response) {
-		if ( RestApiHelper._isSuccess(response.status) ) {
-			return response.json;
-		}
-		else {
-			throw new Error(RestApiHelper._config.status[response.status] || config.statusDescription[response.status]);
-		}
-	}
-
 	static async _fetch(method, url = '', body = {}) {
 		try {
 			const response = await fetch(RestApiHelper._config.baseURL + url, {
@@ -37,6 +28,15 @@ export class RestApiHelper {
 		}
 		catch ( e ) {
 			throw e;
+		}
+	}
+
+	static _decorate(response) {
+		if ( RestApiHelper._isSuccess(response.status) ) {
+			return response.json;
+		}
+		else {
+			throw new Error(RestApiHelper._config.status[response.status] || config.statusDescription[response.status]);
 		}
 	}
 
