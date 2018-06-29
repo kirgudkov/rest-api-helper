@@ -68,3 +68,14 @@ describe('_isSuccess', function() {
 	});
 
 });
+
+describe('_fetch', function() {
+	it('should return properly body request in JSON', async function() {
+
+		RestApiHelper.configure({ "successStatus": [200], "baseURL": "" });
+
+		const response = await RestApiHelper._fetch('get', 'http://httpbin.org/get');
+		assert.equal(JSON.stringify(response), '{"args":{},"headers":{"Accept":"*/*","Accept-Encoding":"gzip,deflate","Connection":"close","Host":"httpbin.org","User-Agent":"node-fetch/1.0 (+https://github.com/bitinn/node-fetch)"},"origin":"109.184.34.164","url":"http://httpbin.org/get"}');
+
+	});
+});

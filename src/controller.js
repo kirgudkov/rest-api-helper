@@ -1,3 +1,4 @@
+import "isomorphic-fetch";
 const config = require('../config/config');
 
 export class RestApiHelper {
