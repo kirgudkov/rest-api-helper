@@ -9,7 +9,7 @@ export class RestApiHelper {
 	 * Run RestApiHelper.configure(require(<your_config.json>)) to initialize controller
 	 * @param config
 	 */
-	static _config: JSON;
+	static _config;
 
 	static configure(config) {
 		RestApiHelper._config = config;
