@@ -43,3 +43,9 @@ getSomething(new Request(token)).then((response) => {
 ```
 ## Important:
 baseURL is required
+
+## TODO
+
+- [X] add GET support
+- [] add POST support
+- [] add multipart/form-data
