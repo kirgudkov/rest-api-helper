@@ -39,8 +39,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="720">
-                <caret line="48" column="4" selection-start-line="48" selection-start-column="4" selection-end-line="48" selection-end-column="4" />
+              <first_editor relative-caret-position="750">
+                <caret line="50" column="33" selection-start-line="50" selection-start-column="33" selection-end-line="50" selection-end-column="33" />
               </first_editor>
               <second_editor />
             </state>
@@ -195,7 +195,7 @@
       <updated>1530222284994</updated>
       <workItem from="1530222286540" duration="1244000" />
       <workItem from="1530224529397" duration="439000" />
-      <workItem from="1530224978317" duration="5177000" />
+      <workItem from="1530224978317" duration="5278000" />
     </task>
     <task id="LOCAL-00001" summary="init commit">
       <created>1530226591237</created>
@@ -211,11 +211,25 @@
       <option name="project" value="LOCAL" />
       <updated>1530229224208</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Update README.md">
+      <created>1530230718616</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1530230718616</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Update README.md">
+      <created>1530230773799</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1530230773799</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6860000" />
+    <option name="totallyTimeSpent" value="6961000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="1027" extended-state="6" />
@@ -250,7 +264,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init commit" />
     <MESSAGE value="0.0.2 version.&#10;Update README.md&#10;Rename main class" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.0.2 version.&#10;Update README.md&#10;Rename main class" />
+    <MESSAGE value="Update README.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update README.md" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/index.js">
@@ -351,8 +366,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="720">
-            <caret line="48" column="4" selection-start-line="48" selection-start-column="4" selection-end-line="48" selection-end-column="4" />
+          <first_editor relative-caret-position="750">
+            <caret line="50" column="33" selection-start-line="50" selection-start-column="33" selection-end-line="50" selection-end-column="33" />
           </first_editor>
           <second_editor />
         </state>
