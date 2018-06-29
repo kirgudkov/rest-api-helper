@@ -35,7 +35,7 @@ async getSomething(request: Request) {
 	return new Response(response);
 }
 ```
- - Call `getSomethisng()` wherever you need. Example:
+ - Call `getSomething()` wherever you need. Example:
  ```$xslt
 getSomething(new Request(token)).then((response) => {
 	// do something
