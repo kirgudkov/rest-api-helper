@@ -1,4 +1,4 @@
-import { RestApiHelper } from "../src/restApiHelper";
+import { RestApiHelper } from "../src/RestApiHelper";
 import 'chai/register-should';
 import 'chai/register-assert';
 import 'chai/register-expect';

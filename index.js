@@ -1,1 +1,1 @@
-export { RestApiHelper } from './src/restApiHelper';
+export { RestApiHelper } from './src/RestApiHelper';

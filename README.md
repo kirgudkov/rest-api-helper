@@ -18,7 +18,8 @@ First thing first you need to configure helper.
     },
     "successStatus": [
         200
-    ]
+    ],
+    "logger": false
 }
 ```
  - Call `RestApiHelper.configure(require('path_to_your_config.json'));`
@@ -41,6 +42,7 @@ getSomething(new Request(token)).then((response) => {
 	// do something
 }).catch((error) => console.log(error));
 ```
+ - If you need logs, set `logger: true` in config.json (default `false`)
 ## Important:
 baseURL is required
 
@@ -49,3 +51,4 @@ baseURL is required
 - [X] GET support
 - [X] POST support
 - [ ] multipart/form-data support
+- [X] Logger

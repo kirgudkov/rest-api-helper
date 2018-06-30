@@ -1,4 +1,5 @@
 import "isomorphic-fetch";
+import { Logger } from './Logger';
 
 const config = require('../config/config');
 
@@ -11,16 +12,27 @@ export class RestApiHelper {
 	 * Run RestApiHelper.configure(require(<your_config.json>)) to initialize controller
 	 * @param config
 	 */
-	static _config;
+	static _config = {};
 
 	static configure(config) {
 		RestApiHelper._config = config;
+		Logger.setOption(RestApiHelper._config.logger);
+
+		Logger.log('RestApiHelper has been configured', Logger.style.bold, JSON.parse(RestApiHelper._config));
 	}
 
 	static async _fetch(method, url = '', body = {}) {
 		try {
+
+			Logger.log('_fetch is starting with: ', Logger.style.bold, {
+				url: RestApiHelper._getUrl(url),
+				...RestApiHelper._getOptions(method, body)
+			});
+
 			const response = await fetch(RestApiHelper._getUrl(url), RestApiHelper._getOptions(method, body));
 			const json = await response.json();
+
+			Logger.log('Request was successfully done with status:', Logger.style.bold, response.status, json);
 
 			return RestApiHelper._decorate({ status: response.status, json: json });
 		}
@@ -34,6 +46,7 @@ export class RestApiHelper {
 			return response.json;
 		}
 		else {
+			Logger.log(`Request was successfully done, but status don't belong to yours success list`, Logger.style.red + ',' + Logger.style.bold);
 			throw new Error(RestApiHelper._config.status[response.status] || config.statusDescription[response.status]);
 		}
 	}
