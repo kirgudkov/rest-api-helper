@@ -1,10 +1,11 @@
 import "isomorphic-fetch";
+
 const config = require('../config/config');
 
 export class RestApiHelper {
 
 	/**
-	 * User config.json
+	 * User's config.json
 	 * Required property baseURL
 	 * Required property headers. Set it as {} and redefine before call _fetch()
 	 * Run RestApiHelper.configure(require(<your_config.json>)) to initialize controller
@@ -18,11 +19,7 @@ export class RestApiHelper {
 
 	static async _fetch(method, url = '', body = {}) {
 		try {
-			const response = await fetch(RestApiHelper._config.baseURL + url, {
-				method: RestApiHelper._getMethod(method),
-				headers: RestApiHelper._config.headers,
-				body: RestApiHelper._getBody(method, body)
-			});
+			const response = await fetch(RestApiHelper._getUrl(url), RestApiHelper._getOptions(method, body));
 			const json = await response.json();
 
 			return RestApiHelper._decorate({ status: response.status, json: json });
@@ -63,6 +60,23 @@ export class RestApiHelper {
 		}
 		else {
 			return JSON.stringify(body);
+		}
+	}
+
+	static _getHeaders() {
+		return RestApiHelper._config.headers || {}
+	}
+
+	static _getUrl(url) {
+		let baseURL = RestApiHelper._config.baseURL || '';
+		return baseURL + url
+	}
+
+	static _getOptions(method, body) {
+		return {
+			method: RestApiHelper._getMethod(method),
+			headers: RestApiHelper._getHeaders(),
+			body: RestApiHelper._getBody(method, body)
 		}
 	}
 }
