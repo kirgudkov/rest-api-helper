@@ -11,6 +11,6 @@ export class Logger {
 	}
 
 	static log(message, style = '') {
-		console.log('%c'+message, style);
+		this._option && console.log('%c'+message, style);
 	}
 }
