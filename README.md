@@ -47,5 +47,5 @@ baseURL is required
 ## TODO
 
 - [X] GET support
-- [ ] POST support
+- [X] POST support
 - [ ] multipart/form-data support
