@@ -1,5 +1,5 @@
 import "isomorphic-fetch";
-import { Logger } from './Logger';
+import { Logger } from './api-hepler-logger';
 import config from '../config/config';
 
 export class RestApiHelper {
