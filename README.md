@@ -19,7 +19,7 @@ First thing first you need to configure helper.
     "successStatus": [
         200
     ],
-    "logger": false
+    "logger": true
 }
 ```
  - Call `RestApiHelper.configure(require('path_to_your_config.json'));`

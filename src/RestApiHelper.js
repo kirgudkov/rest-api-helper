@@ -1,7 +1,6 @@
 import "isomorphic-fetch";
 import { Logger } from './Logger';
-
-const config = require('../config/config');
+import config from '../config/config';
 
 export class RestApiHelper {
 
@@ -18,21 +17,31 @@ export class RestApiHelper {
 		RestApiHelper._config = config;
 		Logger.setOption(RestApiHelper._config.logger);
 
-		Logger.log('RestApiHelper has been configured', Logger.style.bold, JSON.parse(RestApiHelper._config));
+		Logger.log('ApiHelper/CONFIGURE', { 'config': RestApiHelper._config });
 	}
 
 	static async _fetch(method, url = '', body = {}) {
 		try {
 
-			Logger.log('_fetch is starting with: ', Logger.style.bold, {
-				url: RestApiHelper._getUrl(url),
-				...RestApiHelper._getOptions(method, body)
-			});
+			Logger.log('ApiHelper/RUN: ', {
+					'url': RestApiHelper._getUrl(url),
+					...RestApiHelper._getOptions(method, body),
+					'body': body
+				}
+			);
 
 			const response = await fetch(RestApiHelper._getUrl(url), RestApiHelper._getOptions(method, body));
-			const json = await response.json();
+			Logger.log('ApiHelper/COMPLETE:', { 'response': response }, 'blue');
 
-			Logger.log('Request was successfully done with status:', Logger.style.bold, response.status, json);
+			let json = {};
+
+			try {
+				json = await response.json();
+				Logger.log('ApiHelper/PARSE:', { 'status': response.status, 'json': json }, 'green');
+			}
+			catch ( e ) {
+
+			}
 
 			return RestApiHelper._decorate({ status: response.status, json: json });
 		}
@@ -46,8 +55,11 @@ export class RestApiHelper {
 			return response.json;
 		}
 		else {
-			Logger.log(`Request was successfully done, but status don't belong to yours success list`, Logger.style.red + ',' + Logger.style.bold);
-			throw new Error(RestApiHelper._config.status[response.status] || config.statusDescription[response.status]);
+			Logger.log(`ApiHelper/ERROR:`, {
+				'status': `${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`
+			}, 'red');
+
+			throw new Error(`${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`);
 		}
 	}
 
