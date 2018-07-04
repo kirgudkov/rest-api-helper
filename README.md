@@ -25,18 +25,18 @@ First thing first you need to configure helper.
  - Call `RestApiHelper.configure(require('path_to_your_config.json'));` before `fetch()`
  - Define yor API methods. Example:
  ```$xslt
-async getSomething(request: Request) {
+async getSomething(request: SomeRequest) {
 	// redefine property "headers" at you config.json
 	config.headers = {
 		"Authorization": request.getToken(),
 	};
 	let response = await RestApiHelper.fetch('get', 'something/get');
-	return new Response(response);
+	return new SomeResponse(response);
 }
 ```
- - Call `getSomething()` wherever you need. Example:
+ - Then call `getSomething()` wherever you need. Example:
  ```$xslt
-getSomething(new Request(token)).then((response) => {
+getSomething(new SomeRequest(token)).then((response: SomeResponse) => {
 	// do something
 }).catch((error) => console.log(error));
 ```
@@ -69,7 +69,6 @@ RestApiHelper.fetch('post', 'https://some.api.full.url/data', data);
 ```
 - If request throws error associated with an unsuccessful status (like 500), you can parse it and handle. For example:
 ```$xslt
-...
 ...}).catch((error) => {
     console.log(error.name); // "bad" status, like 500
     console.log(error.description); // desc, like "Internal server error"
