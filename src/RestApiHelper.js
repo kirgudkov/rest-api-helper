@@ -7,7 +7,7 @@ export class RestApiHelper {
 	/**
 	 * User's config.json
 	 * Required property baseURL
-	 * Required property headers. Set it as {} and redefine before call _fetch()
+	 * Required property headers. Set it as {} and redefine before call fetch()
 	 * Run RestApiHelper.configure(require(<your_config.json>)) to initialize controller
 	 * @param config
 	 */
@@ -17,33 +17,29 @@ export class RestApiHelper {
 		RestApiHelper._config = config;
 		Logger.setOption(RestApiHelper._config.logger);
 
-		Logger.log('ApiHelper/CONFIGURE', { 'config': RestApiHelper._config });
+		Logger.log('ApiHelper/CONFIGURATION', { 'config': RestApiHelper._config });
 	}
 
-	static async _fetch(method, url = '', body = {}) {
+	static async fetch(method, url = '', body = {}) {
+		let requestBody = {};
 		try {
-
 			Logger.log('ApiHelper/RUN: ', {
 					'url': RestApiHelper._getUrl(url),
 					...RestApiHelper._getOptions(method, body),
 					'body': body
 				}
 			);
-
 			const response = await fetch(RestApiHelper._getUrl(url), RestApiHelper._getOptions(method, body));
 			Logger.log('ApiHelper/COMPLETE:', { 'response': response }, 'blue');
 
-			let json = {};
-
 			try {
-				json = await response.json();
-				Logger.log('ApiHelper/PARSE:', { 'status': response.status, 'json': json }, 'green');
+				requestBody = await response.json();
+				Logger.log('ApiHelper/PARSE:', { 'status': response.status, 'body': requestBody }, 'green');
 			}
 			catch ( e ) {
-
+				// that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
 			}
-
-			return RestApiHelper._decorate({ status: response.status, json: json });
+			return RestApiHelper._decorate({ status: response.status, body: requestBody });
 		}
 		catch ( e ) {
 			throw e;
@@ -52,14 +48,18 @@ export class RestApiHelper {
 
 	static _decorate(response) {
 		if ( RestApiHelper._isSuccess(response.status) ) {
-			return response.json;
+			return response.body;
 		}
 		else {
 			Logger.log(`ApiHelper/ERROR:`, {
 				'status': `${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`
 			}, 'red');
 
-			throw new Error(`${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`);
+			throw new RequestError(
+				`${response.status}`,
+				`${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`,
+				JSON.stringify(response.body)
+			);
 		}
 	}
 
@@ -80,7 +80,10 @@ export class RestApiHelper {
 	}
 
 	static _getBody(method, body) {
-		if ( method === 'get' || method === 'GET' || method === 'head' || method === 'HEAD' ) {
+		if ( body instanceof FormData ) {
+			return body;
+		}
+		if ( RestApiHelper._isBodyNotAllowed(method) ) {
 			return null;
 		}
 		else {
@@ -88,11 +91,20 @@ export class RestApiHelper {
 		}
 	}
 
+	static _isBodyNotAllowed(method) {
+		return method === 'get' || method === 'GET' || method === 'head' || method === 'HEAD'
+	}
+
 	static _getHeaders() {
 		return RestApiHelper._config.headers || {}
 	}
 
 	static _getUrl(url) {
+
+		if ( url.indexOf('https://') !== -1 || url.indexOf('http://') !== -1 ) {
+			return url;
+		}
+
 		let baseURL = RestApiHelper._config.baseURL || '';
 		return baseURL + url
 	}

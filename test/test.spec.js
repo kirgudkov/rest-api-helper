@@ -69,12 +69,12 @@ describe('_isSuccess', function() {
 
 });
 
-describe('_fetch', function() {
+describe('fetch', function() {
 	it('should return properly body request in JSON', async function() {
 
 		RestApiHelper.configure({ "successStatus": [200], "baseURL": "" });
 
-		const response = await RestApiHelper._fetch('get', 'http://httpbin.org/get');
+		const response = await RestApiHelper.fetch('get', 'http://httpbin.org/get');
 		response.should.be.a('object');
 	});
 });
