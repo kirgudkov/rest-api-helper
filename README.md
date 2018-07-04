@@ -42,7 +42,6 @@ getSomething(new Request(token)).then((response) => {
 ```
 #### Note:
 > We recommend using data models for greater code purity. Like we do - pass new SomeRequest() and return new SomeResponse()
----
  - If you need logs, set `logger: true` in config.json (default `false`)
  - `multipart/form-data` example:
  ```$xslt
@@ -84,3 +83,4 @@ RestApiHelper.fetch('post', 'https://some.api.full.url/data', data);
 - [X] multipart/form-data support
 - [X] Logger
 - [X] Specific urls
+- [ ] XML support
