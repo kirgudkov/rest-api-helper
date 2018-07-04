@@ -1,6 +1,8 @@
 import "isomorphic-fetch";
 import { Logger } from './api-hepler-logger';
 import config from '../config/config';
+import FormData from 'form-data';
+import { RequestError } from "./RequestError";
 
 export class RestApiHelper {
 
@@ -100,7 +102,6 @@ export class RestApiHelper {
 	}
 
 	static _getUrl(url) {
-
 		if ( url.indexOf('https://') !== -1 || url.indexOf('http://') !== -1 ) {
 			return url;
 		}

@@ -44,13 +44,13 @@ describe('_getMethod', function() {
 describe('_decorate', function() {
 	it('should return json if status means success', function() {
 		RestApiHelper.configure({ "successStatus": [200] });
-		assert(RestApiHelper._decorate({ status: 200, json: {} }), {})
+		assert(RestApiHelper._decorate({ status: 200, body: {} }), {})
 	});
 
-	it(`should return Error status doesn't means success`, () => {
+	it(`should return RequestError status doesn't means success`, () => {
 		(function() {
 			RestApiHelper.configure({ "successStatus": [] });
-			RestApiHelper._decorate({ status: 200, json: {} })
+			RestApiHelper._decorate({ status: 200, body: {} })
 		}).should.Throw(Error)
 	});
 });
