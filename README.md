@@ -8,9 +8,10 @@ First thing first you need to configure helper.
   - Define basic things for fetch:
   
   It's like a
-  ```$xslt
+  ```
 {
     "baseURL": "http://your.api.base.url/api/v1/",
+    "logger": true
     "headers": {},
     "statusDescription": {
         "200": "OK",
@@ -19,23 +20,35 @@ First thing first you need to configure helper.
     "successStatus": [
         200
     ],
-    "logger": true
+    "request": {
+       "getSomething": {
+          "method": "get",
+          "url": "something/get",
+          "headers": {
+             "Content-Type": "application/json",
+             "Authorization": ""
+          }
+       }
+    }
 }
 ```
+ - Put your request's options in "request" property. 
+ Leave dynamic options as empty properties, like "Authorization".
  - Call `RestApiHelper.configure(require('path_to_your_config.json'));` before `fetch()`
  - Define yor API methods. Example:
- ```$xslt
+ ```
 async getSomething(request: SomeRequest) {
-	// redefine property "headers" at you config.json
-	config.headers = {
-		"Authorization": request.getToken(),
-	};
-	let response = await RestApiHelper.fetch('get', 'something/get');
+
+	RestApiHelper.setHeaders({
+		"Authorization": request.token,
+	}, 'getSomething');
+	
+	let response = await RestApiHelper.fetch('getSomething');
 	return new SomeResponse(response);
 }
 ```
  - Then call `getSomething()` wherever you need. Example:
- ```$xslt
+ ```
 getSomething(new SomeRequest(token)).then((response: SomeResponse) => {
 	// do something
 }).catch((error) => console.log(error));
@@ -44,31 +57,37 @@ getSomething(new SomeRequest(token)).then((response: SomeResponse) => {
 > We recommend using data models for greater code purity. Like we do - pass new SomeRequest() and return new SomeResponse()
  - If you need logs, set `logger: true` in config.json (default `false`)
  - `multipart/form-data` example:
- ```$xslt
+ ```
 async uploadPhoto(file: File) {
-    let data = new FormData();
-    
-    data.append('file', {
+
+    let formData = new FormData();
+    formData.append('file', {
         uri: file.getUri()
     });
+    formData.append('name', file.getName());
     
-    data.append('name', file.getName());
+    RestApiHelper.setBody(formData, 'uploadFile');
     
-    config.headers = {
-      "content-type": "multipart/form-data"
-    };
-    
-    let response = await RestApiHelper._fetch('post', '/upload', data);
+    let response = await RestApiHelper.fetch('uploadFile');
     return new Response(response);
 }
 ```
+> Don't forget declare `"Content-type": "multipart/form-data"` header for this kind of request
 ## Important:
-- baseURL is required. But, if you need use a specific url for some requests, you should pass full url string as argument, like:
-```$xslt
-RestApiHelper.fetch('post', 'https://some.api.full.url/data', data);
+- If you need use a specific url for some requests, 
+just put full url string in "url" property, like:
+```
+"getSomething": {
+   "method": "get",
+   "url": "http://your.api.specific.url/api/v1/something/get",
+   "headers": {
+      "Content-Type": "application/json",
+      "Authorization": ""
+   }
+}
 ```
 - If request throws error associated with an unsuccessful status (like 500), you can parse it and handle. For example:
-```$xslt
+```
 ...}).catch((error) => {
     console.log(error.name); // "bad" status, like 500
     console.log(error.description); // desc, like "Internal server error"

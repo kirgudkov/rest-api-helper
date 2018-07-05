@@ -1,6 +1,6 @@
 {
   "name": "rest-api-helper",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "REST API helper, JS fetch proxy",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/volga-volga/rest-api-helper.git"
+    "url": "https://github.com/volga-volga/rest-api-helper"
   },
   "keywords": [
     "rest",
     "api",
     "restapi",
-    "http"
+    "http",
+    "request",
+    "helper",
+    "fetch"
   ],
   "author": "Kirill Gudkov",
   "license": "ISC",
