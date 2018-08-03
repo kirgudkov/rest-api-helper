@@ -1,4 +1,3 @@
-import "isomorphic-fetch";
 import FormData from "form-data";
 import { Logger } from './api-hepler-logger';
 import config from '../config/config';
