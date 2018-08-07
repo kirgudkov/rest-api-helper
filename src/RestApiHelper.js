@@ -11,7 +11,7 @@ export class RestApiHelper {
 	static configure(config) {
 		RestApiHelper._config = config;
 		Logger.setOption(config.logger);
-		Logger.log('ApiHelper/CONFIGURATION', { config });
+		Logger.log('ApiHelper/CONFIGURATION', {config});
 	}
 
 	static setHeaders(headers, request) {
@@ -33,6 +33,16 @@ export class RestApiHelper {
 		}
 	}
 
+	static setIdParam(id, request) {
+		let url = RestApiHelper._config.request[request].url;
+		if (url.search('{id}') !== -1) {
+			RestApiHelper._config.request[request].url = url.replace('{id}', `${id}`);
+		}
+		else {
+			throw new Error(`param 'id' does not declared in url`);
+		}
+	}
+
 	static async fetch(request) {
 		let requestBody = {};
 		const options = new Options(RestApiHelper._config.request[request], RestApiHelper._config.baseURL);
@@ -45,16 +55,16 @@ export class RestApiHelper {
 
 			const response = await fetch(options.getUrl(), options.getOptions());
 
-			Logger.log('ApiHelper/COMPLETE:', { 'response': response }, 'blue');
+			Logger.log('ApiHelper/COMPLETE:', {'response': response}, 'blue');
 
 			try {
 				requestBody = await response.json();
-				Logger.log('ApiHelper/PARSE:', { 'status': response.status, 'body': requestBody }, 'green');
+				Logger.log('ApiHelper/PARSE:', {'status': response.status, 'body': requestBody}, 'green');
 			}
 			catch (error) {
 				// that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
 			}
-			return RestApiHelper._decorate({ status: response.status, body: requestBody });
+			return RestApiHelper._decorate({status: response.status, body: requestBody});
 		}
 		catch (error) {
 			throw error;

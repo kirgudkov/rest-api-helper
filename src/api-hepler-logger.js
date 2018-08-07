@@ -14,12 +14,17 @@ export class Logger {
 	}
 
 	static log(message, log, options) {
-		if ( this._option ) {
-			console.groupCollapsed('%c action', style.thin, message);
-			for ( let i in log ) {
-				console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
+		if (this._option) {
+			try {
+				console.groupCollapsed('%c action', style.thin, message);
+				for (let i in log) {
+					console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
+				}
+				console.groupEnd();
 			}
-			console.groupEnd();
+			catch (e) {
+				//that's okay, logs doesn't supported js engine
+			}
 		}
 	}
 
@@ -28,8 +33,8 @@ export class Logger {
 		let length = str.length;
 		let title = str;
 
-		if ( length < 10 ) {
-			for ( let i = 0; i < 10 - length; i++ ) {
+		if (length < 10) {
+			for (let i = 0; i < 10 - length; i++) {
 				title += ' ';
 			}
 		}
