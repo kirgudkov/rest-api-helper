@@ -55,7 +55,18 @@ getSomething(new SomeRequest(token)).then((response: SomeResponse) => {
 ```
 #### Note:
 > We recommend using data models for greater code purity. Like we do - pass new SomeRequest() and return new SomeResponse()
- - If you need logs, set `logger: true` in config.json (default `false`)
+##
+### Logger:
+ - If you need logs (which are pretty cool btw :)), set `logger: true` in config.json
+##### Important for React-Native:
+> Logger might produce crashes at release builds or in debugger-off mode. 
+Because that kind of logs supported only in V8 engine. We recommend use this hack before `RestApiHelper.config()`:
+```
+config.logger = __DEV__ && Boolean(global.origin);
+RestApiHelper.configure(config);
+```
+> Then logger will be working only in dev mode and debug-on mode
+##
  - `multipart/form-data` example:
  ```
 async uploadPhoto(file: File) {
@@ -73,8 +84,24 @@ async uploadPhoto(file: File) {
 }
 ```
 > Don't forget declare `"Content-type": "multipart/form-data"` header for this kind of request
-## Important:
-- If you need use a specific url for some requests, 
+- if You need to use id parameter at some url's, do it like this:
+```
+//config.json
+"get_something_by_id": {
+        "method": "get",
+        "url": "/something/{id}"
+      }
+      
+...
+
+async getSomethingById(id) {
+    RestApiHelper.setIdParam(id, 'get_something_by_id'); // it automatically specify id parameter
+    let response = await RestApiHelper.fetch('get_something_by_id');
+    return new Response(response);
+}
+```
+## Specific url:
+- If You need use a specific url for some requests, 
 just put full url string in "url" property, like:
 ```
 "getSomething": {
@@ -94,6 +121,7 @@ just put full url string in "url" property, like:
     console.log(JSON.parse(error.message)); // response body, like {error: 'Internal server error'}
 });
 ```
+> Statuses not specified as "successStatus" in config.json will appears at `catch()` 
 
 ## TODO
 
@@ -101,4 +129,5 @@ just put full url string in "url" property, like:
 - [X] multipart/form-data support
 - [X] Logger
 - [X] Specific urls
+- [X] Support {id} param in url
 - [ ] XML support

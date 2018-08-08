@@ -17,13 +17,23 @@ export class Logger {
 		if (this._option) {
 			try {
 				console.groupCollapsed('%c action', style.thin, message);
-				for (let i in log) {
+			}
+			catch (e) {
+				//that's okay, console.groupCollapsed doesn't supported js engine
+			}
+			for (let i in log) {
+				try {
 					console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
 				}
+				catch (e) {
+					//that's okay, console.log doesn't supported js engine
+				}
+			}
+			try {
 				console.groupEnd();
 			}
 			catch (e) {
-				//that's okay, logs doesn't supported js engine
+				//that's okay, console.groupEnd() doesn't supported js engine
 			}
 		}
 	}

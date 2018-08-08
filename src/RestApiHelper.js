@@ -39,7 +39,7 @@ export class RestApiHelper {
 			RestApiHelper._config.request[request].url = url.replace('{id}', `${id}`);
 		}
 		else {
-			throw new Error(`param 'id' does not declared in url`);
+			throw new Error(`param 'id' does not declared in ${url}`);
 		}
 	}
 
