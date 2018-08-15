@@ -44,7 +44,7 @@ async getSomething(request: SomeRequest) {
 	}, 'getSomething');
 	
 	let response = await RestApiHelper.fetch('getSomething');
-	return new SomeResponse(response);
+	return new SomeResponse(response.body);
 }
 ```
  - Then call `getSomething()` wherever you need. Example:
@@ -55,6 +55,9 @@ getSomething(new SomeRequest(token)).then((response: SomeResponse) => {
 ```
 #### Note:
 > We recommend using data models for greater code purity. Like we do - pass new SomeRequest() and return new SomeResponse()
+
+##
+> Response object contains response body and response headers. If You need to know about response headers, just call `response.headers` besides `response.body`
 ##
 ### Logger:
  - If you need logs (which are pretty cool btw :)), set `logger: true` in config.json
@@ -80,7 +83,7 @@ async uploadPhoto(file: File) {
     RestApiHelper.setBody(formData, 'uploadFile');
     
     let response = await RestApiHelper.fetch('uploadFile');
-    return new Response(response);
+    return new Response(response.body);
 }
 ```
 > Don't forget declare `"Content-type": "multipart/form-data"` header for this kind of request
@@ -97,7 +100,7 @@ async uploadPhoto(file: File) {
 async getSomethingById(id) {
     RestApiHelper.setIdParam(id, 'get_something_by_id'); // it automatically specify id parameter
     let response = await RestApiHelper.fetch('get_something_by_id');
-    return new Response(response);
+    return new Response(response.body);
 }
 ```
 ## Specific url:
