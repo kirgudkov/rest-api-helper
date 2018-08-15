@@ -45,6 +45,7 @@ export class RestApiHelper {
 
 	static async fetch(request) {
 		let requestBody = {};
+		let requestHeaders = {};
 		const options = new Options(RestApiHelper._config.request[request], RestApiHelper._config.baseURL);
 
 		try {
@@ -57,14 +58,24 @@ export class RestApiHelper {
 
 			Logger.log('ApiHelper/COMPLETE:', {'response': response}, 'blue');
 
+			if (response.headers) {
+				if (response.headers.map) {
+					requestHeaders = response.headers.map;
+				}
+				else {
+					requestHeaders = response.headers;
+				}
+			}
+
 			try {
 				requestBody = await response.json();
-				Logger.log('ApiHelper/PARSE:', {'status': response.status, 'body': requestBody}, 'green');
+
+				Logger.log('ApiHelper/PARSE:', {'status': response.status, 'body': requestBody, 'headers': requestHeaders}, 'green');
 			}
 			catch (error) {
 				// that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
 			}
-			return RestApiHelper._decorate({status: response.status, body: requestBody});
+			return RestApiHelper._decorate({status: response.status, body: requestBody, headers: requestHeaders});
 		}
 		catch (error) {
 			throw error;
@@ -73,7 +84,7 @@ export class RestApiHelper {
 
 	static _decorate(response) {
 		if (RestApiHelper._isSuccess(response.status)) {
-			return response.body;
+			return {'body': response.body, 'headers': response.headers};
 		}
 		else {
 			Logger.log(`ApiHelper/ERROR:`, {
