@@ -7,17 +7,16 @@ function getValue(key, value) {
   return `${key}=${value}`;
 }
 
-export function getQueryParameters(obj) {
+export function getQueryParameters(body) {
+  if (!body) {
+    return '';
+  }
   let res = '';
-  const keys = Object.keys(obj);
-  for (let j = 0; j < keys.length; j += 1) {
-    const i = keys[j];
-    if (obj[i] !== undefined) {
-      if (res === '') {
-        res = getValue(i, obj[i], transformArrays);
-      } else {
-        res += `&${getValue(i, obj[i], transformArrays)}`;
-      }
+  const parameters = Object.keys(body);
+  for (let i = 0; i < parameters.length; ++i) {
+    const parameterName = parameters[i];
+    if (body[parameterName] !== undefined) {
+      res = `${res.length === 0 ? '?' : '&'}${getValue(parameterName, body[parameterName])}`;
     }
   }
   return res;

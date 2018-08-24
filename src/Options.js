@@ -1,5 +1,5 @@
 import FormData from 'form-data';
-import { getQueryParameters } from '../../../app/lib/api';
+import { getQueryParameters } from './utils';
 import config from '../config/config';
 
 export class Options {
