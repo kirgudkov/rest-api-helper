@@ -133,4 +133,7 @@ just put full url string in "url" property, like:
 - [X] Logger
 - [X] Specific urls
 - [X] Support {id} param in url
+- [X] Response headers parsing
+- [X] setBody for get and head requests
+- [X] Make config immutable 
 - [ ] XML support
