@@ -16,7 +16,7 @@ export function getQueryParameters(body) {
   for (let i = 0; i < parameters.length; ++i) {
     const parameterName = parameters[i];
     if (body[parameterName] !== undefined) {
-      res = `${res.length === 0 ? '?' : '&'}${getValue(parameterName, body[parameterName])}`;
+      res += `${res.length === 0 ? '?' : '&'}${getValue(parameterName, body[parameterName])}`;
     }
   }
   return res;
