@@ -35,6 +35,7 @@ export class Request {
     else {
       throw new Error(`param 'id' does not declared in ${url}`);
     }
+    return this;
   }
 
   async fetch() {
