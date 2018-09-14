@@ -6,7 +6,7 @@ export class Request {
     this._config = config;
   }
 
-  setHeaders(headers) {
+  withHeaders(headers) {
     this._config.headers = {
       ...this._config.headers,
       ...headers,
@@ -14,7 +14,7 @@ export class Request {
     return this;
   }
 
-  setBody(body) {
+  withBody(body) {
     if (body instanceof FormData) {
       this._config.body = body;
     }
@@ -27,7 +27,7 @@ export class Request {
     return this;
   }
 
-  setIdParam(id) {
+  withIdParam(id) {
     let { url } = this._config;
     if (url.search('{id}') !== -1) {
       this._config.url = url.replace('{id}', `${id}`);
