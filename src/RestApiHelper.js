@@ -61,7 +61,7 @@ export class RestApiHelper {
 		let requestBody = {};
 		let requestHeaders = {};
 		const config = typeof request === 'object' ? request._config : RestApiHelper._config.request[request];
-		const options = new Options(config, RestApiHelper._config.baseURL);
+		const options = new Options(config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);
 
 		try {
 			Logger.log(`ApiHelper/FETCH (${options.getUrl()}): `, {

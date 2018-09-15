@@ -3,10 +3,11 @@ import { getQueryParameters } from './utils';
 import config from '../config/config';
 
 export class Options {
-  constructor(request, baseURL) {
-    this.setRequest(request);
-    this.setBaseURL(baseURL);
-  }
+	constructor(request, baseURL, headers) {
+		this.setRequest(request);
+		this.setBaseURL(baseURL);
+		this._globalHeaders = headers;
+	}
 
   setRequest(request) {
     if (request.method === '') {
@@ -48,9 +49,9 @@ export class Options {
     return baseURL + this.request.url;
   }
 
-  getHeaders() {
-    return this.request.headers || {};
-  }
+	getHeaders() {
+		return {...this.request.headers, ...this._globalHeaders} || {};
+	}
 
   getBody() {
     if (this.request.body instanceof FormData) {
