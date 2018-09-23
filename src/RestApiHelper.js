@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import { copyObject } from 'rest-api-helper/src/utils';
 import { Logger } from './api-hepler-logger';
 import config from '../config/config';
@@ -28,38 +27,10 @@ export class RestApiHelper {
 		else throw new Error('You should specify url')
 	}
 
-	static setHeaders(headers, request) {
-		RestApiHelper._config.request[request].headers = {
-			...RestApiHelper._config.request[request].headers,
-			...headers,
-		};
-	}
-
-	static setBody(body, request) {
-		if (body instanceof FormData) {
-			RestApiHelper._config.request[request].body = body;
-		}
-		else {
-			RestApiHelper._config.request[request].body = {
-				...RestApiHelper._config.request[request].body,
-				...body,
-			};
-		}
-	}
-
-	static setIdParam(id, request) {
-		let url = RestApiHelper._config.request[request].url;
-		if (url.search('{id}') !== -1) {
-			RestApiHelper._config.request[request].url = url.replace('{id}', `${id}`);
-		}
-		else {
-			throw new Error(`param 'id' does not declared in ${url}`);
-		}
-	}
-
 	static async fetch(request) {
 		let requestBody = {};
 		let requestHeaders = {};
+
 		const config = typeof request === 'object' ? request._config : RestApiHelper._config.request[request];
 		const options = new Options(config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);
 
