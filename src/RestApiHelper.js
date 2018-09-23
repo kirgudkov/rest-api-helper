@@ -12,7 +12,7 @@ export class RestApiHelper {
 	static configure(config) {
 		RestApiHelper._config = config;
 		Logger.setOption(config.logger);
-		Logger.log('ApiHelper/CONFIGURATION', {config});
+		Logger.log('ApiHelper/CONFIG', {config});
 	}
 
 	static build(url) {
