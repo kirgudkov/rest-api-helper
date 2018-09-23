@@ -50,7 +50,7 @@ export class Options {
   }
 
 	getHeaders() {
-		return {...this.request.headers, ...this._globalHeaders} || {};
+		return {...this._globalHeaders, ...this.request.headers} || {};
 	}
 
   getBody() {
