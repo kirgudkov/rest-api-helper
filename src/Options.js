@@ -51,7 +51,7 @@ export class Options {
 	}
 
 	getHeaders() {
-		return this._objectToLowerCase({...this._globalHeaders, ...this.request.headers} || {});
+		return {...this._globalHeaders, ...this.request.headers} || {};
 	}
 
 	getBody() {
