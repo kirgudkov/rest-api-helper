@@ -5,6 +5,9 @@ import { Options } from './Options';
 import { RequestError } from './RequestError';
 import { Request } from './Requst';
 
+const APPLICATION_JSON = 'application/json; charset=utf-8';
+const TEXT_PLAIN = 'text/plain;charset=UTF-8';
+
 export class RestApiHelper {
   static _config = {};
 
@@ -21,7 +24,9 @@ export class RestApiHelper {
       } catch (e) {
         throw new Error(e);
       }
-    } else throw new Error('You should specify url');
+    } else {
+      throw new Error('You should specify url');
+    }
   }
 
   static async fetch(request) {
@@ -46,7 +51,7 @@ export class RestApiHelper {
 
       const response = await fetch(options.getUrl(), options.getOptions());
 
-      Logger.log('ApiHelper/COMPLETE:', { response: response }, 'blue');
+      Logger.log('ApiHelper/COMPLETE:', { response }, 'blue');
 
       if (response.headers) {
         if (response.headers.map) {
@@ -56,21 +61,10 @@ export class RestApiHelper {
         }
       }
 
-      try {
-        requestBody = await response.json();
-
-        Logger.log(
-          'ApiHelper/PARSE:',
-          {
-            status: response.status,
-            body: requestBody,
-            headers: requestHeaders
-          },
-          'green'
-        );
-      } catch (error) {
+      if (requestHeaders['content-type'] === TEXT_PLAIN) {
         try {
           requestBody = await response.text();
+
           Logger.log(
             'ApiHelper/PARSE:',
             {
@@ -80,9 +74,25 @@ export class RestApiHelper {
             },
             'green'
           );
-        } catch {}
+        } catch (error) {
+          // that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
+        }
+      } else if (requestHeaders['content-type'] === APPLICATION_JSON) {
+        try {
+          requestBody = await response.json();
 
-        // that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
+          Logger.log(
+            'ApiHelper/PARSE:',
+            {
+              status: response.status,
+              body: requestBody,
+              headers: requestHeaders
+            },
+            'green'
+          );
+        } catch (error) {
+          // that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
+        }
       }
       return RestApiHelper._decorate({
         status: response.status,
@@ -100,24 +110,23 @@ export class RestApiHelper {
         body: response.body,
         headers: response.headers
       };
-    } else {
-      Logger.log(
-        `ApiHelper/ERROR:`,
-        {
-          status: `${response.status} ${RestApiHelper._config.statusDescription[
-            response.status
-          ] || config.status[response.status]}`
-        },
-        'red'
-      );
-
-      throw new RequestError(
-        `${response.status}`,
-        `${RestApiHelper._config.statusDescription[response.status] ||
-          config.status[response.status]}`,
-        JSON.stringify(response.body)
-      );
     }
+    Logger.log(
+      'ApiHelper/ERROR:',
+      {
+        status: `${response.status} ${RestApiHelper._config.statusDescription[
+          response.status
+        ] || config.status[response.status]}`
+      },
+      'red'
+    );
+
+    throw new RequestError(
+      `${response.status}`,
+      `${RestApiHelper._config.statusDescription[response.status] ||
+        config.status[response.status]}`,
+      JSON.stringify(response.body)
+    );
   }
 
   static _isSuccess(status) {
