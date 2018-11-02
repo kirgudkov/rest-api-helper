@@ -1,10 +1,12 @@
-import FormData from "form-data";
-import config from '../config/config';
+import FormData from 'form-data';
+import { getQueryParameters, getFormURLEncodedBody } from './utils';
+import RFC from '../config/config';
 
 export class Options {
-	constructor(request, baseURL) {
+	constructor(request, baseURL, headers) {
 		this.setRequest(request);
 		this.setBaseURL(baseURL);
+		this._globalHeaders = headers;
 	}
 
 	setRequest(request) {
@@ -31,36 +33,47 @@ export class Options {
 			method: this.getMethod(),
 			url: this.getUrl(this.request.url),
 			headers: this.getHeaders(this.request.headers),
-			body: this.getBody(this.request.body)
-		}
+			body: this.getBody(this.request.body),
+		};
 	}
 
 	getUrl() {
+		const queryParams = this._isBodyNotAllowed(this.getMethod()) ? getQueryParameters(this.request.body) : '';
+		return this.getRequestUrl() + queryParams;
+	}
+
+	getRequestUrl() {
 		if (this.request.url.indexOf('https://') !== -1 || this.request.url.indexOf('http://') !== -1) {
 			return this.request.url;
 		}
 		let baseURL = this.baseURL || '';
-		return baseURL + this.request.url
+		return baseURL + this.request.url;
 	}
 
 	getHeaders() {
-		return this.request.headers || {};
+		return {...this._globalHeaders, ...this.request.headers} || {};
 	}
 
 	getBody() {
-		if (this.request.body instanceof FormData) {
-			return this.request.body;
-		}
 		if (this._isBodyNotAllowed(this.request.method)) {
 			return null;
 		}
+
+		if (this._isFormURLEncoded()) {
+			return getFormURLEncodedBody(this.request.body);
+		}
+
+		if (this.request.body instanceof FormData) {
+			return this.request.body;
+		}
+
 		return JSON.stringify(this.request.body);
 	}
 
 	getMethod() {
 		// Only methods from the RFC 2616 specification are allowed
-		if (config.method[this.request.method]) {
-			return config.method[this.request.method];
+		if (RFC.method[this.request.method]) {
+			return RFC.method[this.request.method];
 		}
 		else {
 			throw new Error(`Invalid method ${this.request.method}`);
@@ -68,6 +81,31 @@ export class Options {
 	}
 
 	_isBodyNotAllowed(method) {
-		return method === 'get' || method === 'GET' || method === 'head' || method === 'HEAD'
+		const lowerCaseMethod = method.toLowerCase();
+		return lowerCaseMethod === 'get' || lowerCaseMethod === 'head';
+	}
+
+	_isFormURLEncoded() {
+		let isFormUrlEncoded = false;
+		Object.keys(this.request.headers).map(header => {
+			if (this.request.headers[header].toLowerCase() === 'application/x-www-form-urlencoded') {
+				isFormUrlEncoded = true;
+			}
+		});
+
+		return isFormUrlEncoded;
+	}
+
+	_objectToLowerCase(obj) {
+		let result = {};
+
+		Object.keys(obj).map(key => {
+			let lowerKey = key.toString().toLowerCase();
+			const lowerProp = obj[key].toString().toLowerCase();
+
+			return result[lowerKey] = lowerProp;
+		});
+
+		return result;
 	}
 }

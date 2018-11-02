@@ -1,1 +1,1 @@
-export { RestApiHelper } from './src/RestApiHelper';
+export { RestApiHelper, RestApiHelper as default } from './src/RestApiHelper';
