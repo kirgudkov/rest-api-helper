@@ -5,8 +5,8 @@ import { Options } from './Options';
 import { RequestError } from './RequestError';
 import { Request } from './Requst';
 
-const APPLICATION_JSON = 'application/json; charset=utf-8';
-const TEXT_PLAIN = 'text/plain;charset=UTF-8';
+const APPLICATION_JSON = 'application/json';
+const TEXT_PLAIN = 'text/plain';
 
 export class RestApiHelper {
   static _config = {};
@@ -61,7 +61,7 @@ export class RestApiHelper {
         }
       }
 
-      if (requestHeaders['content-type'].toLowerCase() === TEXT_PLAIN.toLowerCase()) {
+      if ((requestHeaders['content-type'].toLowerCase()).indexOf(TEXT_PLAIN) !== -1 ) {
         try {
           requestBody = await response.text();
 
@@ -77,7 +77,7 @@ export class RestApiHelper {
         } catch (error) {
           // that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
         }
-      } else if (requestHeaders['content-type'].toLowerCase() === APPLICATION_JSON.toLowerCase()) {
+      } else if ((requestHeaders['content-type'].toLowerCase()).indexOf(APPLICATION_JSON) !== -1) {
         try {
           requestBody = await response.json();
 
