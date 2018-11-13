@@ -61,7 +61,7 @@ export class RestApiHelper {
         }
       }
 
-      if (requestHeaders['content-type'] === TEXT_PLAIN) {
+      if (requestHeaders['content-type'].toLowerCase() === TEXT_PLAIN.toLowerCase()) {
         try {
           requestBody = await response.text();
 
@@ -77,7 +77,7 @@ export class RestApiHelper {
         } catch (error) {
           // that's okay. If status 400, for example, response.json() crashes, but that's okay :) Do nothing
         }
-      } else if (requestHeaders['content-type'] === APPLICATION_JSON) {
+      } else if (requestHeaders['content-type'].toLowerCase() === APPLICATION_JSON.toLowerCase()) {
         try {
           requestBody = await response.json();
 
