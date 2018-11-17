@@ -42,7 +42,7 @@ export class RestApiHelper {
 			responseHeaders = RestApiHelper._parseHeaders(response);
 
 			try {
-				responseBody = await isTextPlain(responseHeaders) ? response.text() : isApplicatonJson(responseHeaders) ? response.json() : {};
+				responseBody = await isTextPlain(responseHeaders) ? response.text() : isApplicatonJson(responseHeaders) ? response.json() : response.formData();
 				Logger.log('ApiHelper/PARSE:', {
 					status: response.status,
 					body: responseBody,
