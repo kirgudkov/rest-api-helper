@@ -46,7 +46,7 @@ export class Options {
 		if (this.request.url.indexOf('https://') !== -1 || this.request.url.indexOf('http://') !== -1) {
 			return this.request.url;
 		}
-		let baseURL = this.baseURL || '';
+		const baseURL = this.baseURL || '';
 		return baseURL + this.request.url;
 	}
 

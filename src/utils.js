@@ -1,3 +1,6 @@
+const APPLICATION_JSON = 'application/json';
+const TEXT_PLAIN = 'text/plain';
+
 export function copyObject(obj) {
 	return JSON.parse(JSON.stringify(obj));
 }
@@ -34,4 +37,12 @@ export function getFormURLEncodedBody(body) {
 	}
 
 	return formBody.join("&");
+}
+
+export function isTextPlain(headers) {
+	return (headers['content-type'].toLowerCase()).indexOf(TEXT_PLAIN) !== -1
+}
+
+export function isApplicatonJson(headers) {
+	return (headers['content-type'].toLowerCase()).indexOf(APPLICATION_JSON) !== -1;
 }
