@@ -28,7 +28,7 @@ export class Request {
 	}
 
 	withParam(name, value) {
-		let {url} = this._config;
+		const {url} = this._config;
 		if (url.search(`{${name}}`) !== -1) {
 			this._config.url = url.replace(`{${name}}`, `${value}`);
 		}

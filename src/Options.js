@@ -95,17 +95,4 @@ export class Options {
 
 		return isFormUrlEncoded;
 	}
-
-	_objectToLowerCase(obj) {
-		let result = {};
-
-		Object.keys(obj).map(key => {
-			let lowerKey = key.toString().toLowerCase();
-			const lowerProp = obj[key].toString().toLowerCase();
-
-			return result[lowerKey] = lowerProp;
-		});
-
-		return result;
-	}
 }
