@@ -1,5 +1,13 @@
 # REST API Helper
 Simple proxy layer for JavaScript `fetch()`. It helps do some http-requests excluding ugly boilerplate code and pretty cool logs support
+
+> ##### Changelog (0.1.0):
+> - few url param support (f.e: `'get/{type}/{id}'`)
+> - "headers" property is not required in `config.json`
+> - `text/plain` responses are available
+> ##### Breaking changes (0.1.0):
+> - New API (method names, method chaining template. See below). 
+
 ## Installation
     npm install rest-api-helper
 ## Usage
@@ -31,38 +39,39 @@ First thing first you need to configure helper:
 ```
  - Declare your requests in "request" property. 
  - Call `RestApiHelper.configure(require('your_config.json'));` first
- - Define yor API methods. Example:
+ - Define yor API class. Example:
  ```
-async getSomethingById(body, id, token) {
-	const response = await RestApiHelper
-    	.build('getSomethingById')
-    	.withBody(body)
-    	.withParam('id', id)
-    	.withHeaders({'Authorization': token})
-    	.fetch();
-	return new SomeResponse(response.body);
+import { RestApiHelper } from 'rest-api-helper';
+import config from './config';
+
+class Api { 
+    constructor() {
+        RestApiHelper.configure(require('config.json'));
+    }
+    
+    async getSomethingById(body, id, token) {
+        const response = await RestApiHelper
+            .build('getSomethingById')
+            .withBody(body)
+            .withParam('id', id)
+            .withHeaders({'Authorization': token})
+            .fetch();
+        return new SomeResponse(response.body);
+    }
 }
 ```
 #### Note:
 > Response contains body and headers. If You need to know about response headers, just call `response.headers` besides `response.body`
  - Then call `getSomethingById()` wherever you need. Example:
  ```
-getSomething(new SomeRequest(token)).then(response => {
+api.getSomethingById(body, id, token).then(response => {
 	// do something
 }).catch(error => { /* handle error */ });
 ```
-### Logger:
- - If you need logs (which are pretty cool btw :)), set `logger: true` in config.json
-##### Important for React-Native:
-> Logger might produce crashes at release builds or in debugger-off mode. 
-Because that kind of logs supported only in V8 engine. We recommend use this hack before `RestApiHelper.config()`:
-```
-config.logger = __DEV__ && Boolean(global.origin);
-RestApiHelper.configure(config);
-```
-> Then logger will be working only in dev mode and debug-on mode
-##
- - `multipart/form-data` example:
+
+> - Statuses that are not listed as `“successStatus”` in `config.json` will be thrown into `catch()`
+
+####`multipart/form-data` example:
  ```
 async uploadPhoto(file: File) {
     const formData = new FormData();
@@ -91,7 +100,18 @@ async uploadPhoto(file: File) {
      }
 }
       
-```      
+```   
+##
+### Logger:
+ - If you need logs (which are pretty cool btw :)), set `logger: true` in config.json
+##### Important for React-Native:
+> Logger might produce crashes at release builds or in debugger-off mode. 
+Because that kind of logs supported only in V8 engine. We recommend use this hack before `RestApiHelper.config()`:
+```
+config.logger = __DEV__ && Boolean(global.origin);
+RestApiHelper.configure(config);
+```
+> Then logger will be working only in dev mode and debug-on mode   
 
 ## Specific url:
 - If You need use a specific url for some requests, 
@@ -110,4 +130,3 @@ just put full url string in "url" property, like:
     console.log(error.message); // response body, for example:  {error: 'Authorization has expired'}
 });
 ```
-> Statuses not specified as "successStatus" in config.json will appears at `catch()` 
