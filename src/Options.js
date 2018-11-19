@@ -4,6 +4,9 @@ import RFC from '../config/config';
 
 export class Options {
 	constructor(request, baseURL, headers) {
+		if(!request.headers) {
+			request.headers = {}
+		}
 		this.setRequest(request);
 		this.setBaseURL(baseURL);
 		this._globalHeaders = headers;
