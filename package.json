@@ -1,6 +1,6 @@
 {
   "name": "rest-api-helper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "REST API helper, JS fetch proxy",
   "main": "index.js",
   "scripts": {
