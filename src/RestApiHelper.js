@@ -4,7 +4,7 @@ import config from '../config/config';
 import { Options } from './Options';
 import { RequestError } from './RequestError';
 import { Request } from './Requst';
-import { isApplicatonJson, isTextPlain } from "./utils";
+import { isApplicationJson, isTextPlain } from "./utils";
 
 export class RestApiHelper {
 	static _config = {};
@@ -44,7 +44,7 @@ export class RestApiHelper {
 			try {
 				if (isTextPlain(responseHeaders)) {
 					responseBody = await response.text()
-				} else if (isApplicatonJson(responseHeaders)) {
+				} else if (isApplicationJson(responseHeaders)) {
 					responseBody = await response.json()
 				} else {
 					responseBody = await response.formData()
@@ -70,10 +70,7 @@ export class RestApiHelper {
 
 	static _decorate(response) {
 		if (RestApiHelper._isSuccess(response.status)) {
-			return {
-				body: response.body,
-				headers: response.headers
-			};
+			return response;
 		}
 		const message = {status: `${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`};
 		Logger.log('ApiHelper/ERROR:', message, 'red');

@@ -43,6 +43,6 @@ export function isTextPlain(headers) {
 	return (headers['content-type'].toLowerCase()).indexOf(TEXT_PLAIN) !== -1
 }
 
-export function isApplicatonJson(headers) {
+export function isApplicationJson(headers) {
 	return (headers['content-type'].toLowerCase()).indexOf(APPLICATION_JSON) !== -1;
 }

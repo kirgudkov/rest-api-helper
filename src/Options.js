@@ -70,6 +70,10 @@ export class Options {
 			return this.request.body;
 		}
 
+		if (!this.request.body) {
+			this.request.body = {};
+		}
+
 		return JSON.stringify(this.request.body);
 	}
 
