@@ -25,18 +25,38 @@ export function getQueryParameters(body) {
 }
 
 export function getFormURLEncodedBody(body) {
+	function bodyToPropertiesArray(body, prefix = '') {
+		let formBody = [];
+		for (const property in body) {
+			if (body.hasOwnProperty(property)) {
+				const key = prefix ? `${prefix}[${property}]` : property;
+				const encodedKey = encodeURIComponent(key);
+				switch (typeof body[property]) {
+					case "object":
+						if (Array.isArray(body[property])) {
+							body[property].each((val) => {
+								const encodedValue = encodeURIComponent(val);
+								formBody.push(encodedKey + "[]=" + encodedValue);
+							}, this);
+						}
+						else {
+							formBody = formBody.concat(bodyToPropertiesArray(body[property], property));
+						}
 
-	let formBody = [];
-
-	for (let property in body) {
-		if (body.hasOwnProperty(property)) {
-			let encodedKey = encodeURIComponent(property);
-			let encodedValue = encodeURIComponent(body[property]);
-			formBody.push(encodedKey + "=" + encodedValue);
+					case 'function':
+						break;
+					case 'undefined':
+						break;
+					default:
+						const encodedValue = encodeURIComponent(body[property]);
+						formBody.push(encodedKey + "=" + encodedValue);
+				}
+			}
 		}
+		return formBody;
 	}
 
-	return formBody.join("&");
+	return bodyToPropertiesArray(body).join("&");
 }
 
 export function isTextPlain(headers) {
