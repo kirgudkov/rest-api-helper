@@ -94,8 +94,9 @@ export class Options {
 
 	_isFormURLEncoded() {
 		let isFormUrlEncoded = false;
-		Object.keys(this.request.headers).map(header => {
-			if (this.request.headers[header].toLowerCase() === 'application/x-www-form-urlencoded') {
+		const headers = this.getHeaders();
+		Object.keys(headers).map(header => {
+			if (headers[header].toLowerCase() === 'application/x-www-form-urlencoded') {
 				isFormUrlEncoded = true;
 			}
 		});
