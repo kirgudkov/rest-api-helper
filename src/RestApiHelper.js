@@ -90,7 +90,7 @@ export class RestApiHelper {
 		if (RestApiHelper.interceptor) {
 			RestApiHelper.interceptor.delegate({
 				status: response.status,
-				meta: {}
+				meta: response
 			})
 		}
 
