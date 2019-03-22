@@ -46,6 +46,8 @@ export class RestApiHelper {
   static configure(config: Config): void;
   static build(method: string): Request;
   static builder(): RestApiHelper;
+  withConfig(config: any): RestApiHelper;
+  withInterceptor(interceptor: object): RestApiHelper;
 }
 
 export default RestApiHelper;
