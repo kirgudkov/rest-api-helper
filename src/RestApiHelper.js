@@ -8,7 +8,6 @@ import { isApplicationJson, isTextPlain } from "./utils";
 
 export class RestApiHelper {
 	static _config = {};
-	static interceptor;
 
 	static configure(config) {
 		RestApiHelper._config = config;
@@ -26,22 +25,6 @@ export class RestApiHelper {
 		} else {
 			throw new Error('You should specify url');
 		}
-	}
-
-	static builder() {
-		return RestApiHelper;
-	}
-
-	static withConfig(config) {
-		RestApiHelper._config = config;
-		Logger.setOption(config.logger);
-		Logger.log('ApiHelper/CONFIG', {config});
-		return RestApiHelper;
-	}
-
-	static withInterceptor(interceptor) {
-		RestApiHelper.interceptor = interceptor;
-		return RestApiHelper;
 	}
 
 	static async fetch(request) {
@@ -86,14 +69,6 @@ export class RestApiHelper {
 	}
 
 	static _decorate(response) {
-
-		if (RestApiHelper.interceptor) {
-			RestApiHelper.interceptor.delegate({
-				status: response.status,
-				meta: response
-			})
-		}
-
 		if (RestApiHelper._isSuccess(response.status)) {
 			return response;
 		}
