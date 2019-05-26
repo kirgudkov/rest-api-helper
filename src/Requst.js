@@ -15,7 +15,7 @@ export class Request {
 	}
 
 	withBody(body) {
-		if (body instanceof FormData) {
+		if (body instanceof FormData || Array.isArray(body)) {
 			this._config.body = body;
 		}
 		else {
