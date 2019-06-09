@@ -1,5 +1,5 @@
 import FormData from 'form-data';
-import { isBodyNotAllowed } from 'rest-api-helper/src/utils';
+import { isBodyNotAllowed } from './utils';
 import { RestApiHelper } from './RestApiHelper';
 
 export class Request {
