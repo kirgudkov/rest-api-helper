@@ -1,45 +1,52 @@
 declare module 'rest-api-helper';
 
 interface RequestConfig {
-  url: string,
-  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch',
-  headers?: Headers,
+  url: string;
+  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch';
+  headers?: Headers;
 }
 
 export interface Config {
-  baseURL: string,
-  logger: boolean,
+  baseURL: string;
+  logger: boolean;
   statusDescription: {
-    [status: number]: string,
-  },
+    [status: number]: string;
+  };
   headers?: {
-    [key: string]: string,
+    [key: string]: string;
   },
-  successStatus: number[],
+  successStatus: number[];
   request: {
-    [method: string]: RequestConfig,
-  },
+    [method: string]: RequestConfig;
+  };
 }
 
 interface Body {
-  [key: string]: any,
+  [key: string]: any;
 }
 
+type QueryParams = Body;
+
 interface Headers {
-  [key: string]: string,
+  [key: string]: string;
 }
 
 interface Response {
-  status: number,
-  body: any,
-  headers: Headers,
+  status: number;
+  body: any;
+  headers: Headers;
 }
 
 interface Request {
-  withHeaders(headers: Headers): Request,
-  withBody(body: Body): Request,
-  withParam(): Request,
-  fetch(): Promise<any>,
+  withHeaders(headers: Headers): Request;
+  withBody(body: Body): Request;
+  withQueryParams(params: QueryParams): Request;
+  withUrlParam(name: string, value: string | number): Request;
+  /*
+   * @deprecated - use withUrlParam
+   */
+  withParam(name: string, value: string | number): Request;
+  fetch(): Promise<Response>;
 }
 
 export class RestApiHelper {

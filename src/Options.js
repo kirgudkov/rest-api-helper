@@ -1,5 +1,5 @@
 import FormData from 'form-data';
-import { getQueryParameters, getFormURLEncodedBody } from './utils';
+import { getQueryParameters, getFormURLEncodedBody, isBodyNotAllowed } from './utils';
 import RFC from '../config/config';
 
 export class Options {
@@ -41,8 +41,10 @@ export class Options {
 	}
 
 	getUrl() {
-		const queryParams = this._isBodyNotAllowed(this.getMethod()) ? getQueryParameters(this.request.body) : '';
-		return this.getRequestUrl() + queryParams;
+		const oldParams = isBodyNotAllowed(this.getMethod()) ? this.request.body : {};
+		const queryParams = { ...oldParams, ...(this.request.queryParams || {})};
+		const paramsUrl = Object.keys(queryParams).length > 0 ? getQueryParameters(queryParams) : '';
+		return this.getRequestUrl() + paramsUrl;
 	}
 
 	getRequestUrl() {
@@ -58,7 +60,7 @@ export class Options {
 	}
 
 	getBody() {
-		if (this._isBodyNotAllowed(this.request.method)) {
+		if (isBodyNotAllowed(this.request.method)) {
 			return null;
 		}
 
@@ -85,11 +87,6 @@ export class Options {
 		else {
 			throw new Error(`Invalid method ${this.request.method}`);
 		}
-	}
-
-	_isBodyNotAllowed(method) {
-		const lowerCaseMethod = method.toLowerCase();
-		return lowerCaseMethod === 'get' || lowerCaseMethod === 'head';
 	}
 
 	_isFormURLEncoded() {

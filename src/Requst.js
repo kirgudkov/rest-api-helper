@@ -1,5 +1,6 @@
 import FormData from 'form-data';
-import { RestApiHelper } from 'rest-api-helper/src/RestApiHelper';
+import { isBodyNotAllowed } from 'rest-api-helper/src/utils';
+import { RestApiHelper } from './RestApiHelper';
 
 export class Request {
 	constructor(config) {
@@ -15,7 +16,10 @@ export class Request {
 	}
 
 	withBody(body) {
-		if (body instanceof FormData) {
+		if (isBodyNotAllowed(this._config.method)) {
+			console.warn('RestApiHelper: Body for GET and HEAD queries is deprecated. Use "withQueryParams" instead');
+		}
+		if (body instanceof FormData || Array.isArray(body)) {
 			this._config.body = body;
 		}
 		else {
@@ -27,7 +31,19 @@ export class Request {
 		return this;
 	}
 
+	withQueryParams(params) {
+		this._config.queryParams = {
+			...(this._config.queryParams || {}),
+			...params,
+		};
+		return this;
+	}
+
 	withParam(name, value) {
+		return this.withUrlParam(name, value);
+	}
+
+	withUrlParam(name, value) {
 		const {url} = this._config;
 		if (url.search(`{${name}}`) !== -1) {
 			this._config.url = url.replace(`{${name}}`, `${value}`);

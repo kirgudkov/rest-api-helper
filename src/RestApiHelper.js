@@ -1,10 +1,9 @@
-import { copyObject } from 'rest-api-helper/src/utils';
 import { Logger } from './api-hepler-logger';
 import RFC from '../config/config';
 import { Options } from './Options';
 import { RequestError } from './RequestError';
 import { Request } from './Requst';
-import { isApplicationJson, isTextPlain } from "./utils";
+import { isApplicationJson, isTextPlain, copyObject } from './utils';
 
 export class RestApiHelper {
 	static _config = {};
@@ -72,7 +71,7 @@ export class RestApiHelper {
 		if (RestApiHelper._isSuccess(response.status)) {
 			return response;
 		}
-		const message = {status: `${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`};
+		const message = {status: `${response.status} ${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`};
 		Logger.log('ApiHelper/ERROR:', message, 'red');
 
 		throw new RequestError(`${response.status}`, `${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`, JSON.stringify(response.body));
