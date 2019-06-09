@@ -31,6 +31,10 @@ export class Options {
 		this.baseURL = url;
 	}
 
+	getRelativeUrl() {
+		return this.request.url;
+	}
+
 	getOptions() {
 		return {
 			method: this.getMethod(),

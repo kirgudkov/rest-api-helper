@@ -1,24 +1,24 @@
 declare module 'rest-api-helper';
 
 interface RequestConfig {
-  url: string;
-  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch';
-  headers?: Headers;
+  url: string,
+  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch',
+  headers?: Headers,
 }
 
 export interface Config {
-  baseURL: string;
-  logger: boolean;
+  baseURL: string,
+  logger: boolean,
   statusDescription: {
-    [status: number]: string;
-  };
-  headers?: {
-    [key: string]: string;
+    [status: number]: string,
   },
-  successStatus: number[];
+  headers?: {
+    [key: string]: string,
+  },
+  successStatus: number[],
   request: {
-    [method: string]: RequestConfig;
-  };
+    [method: string]: RequestConfig,
+  },
 }
 
 interface Body {
@@ -50,8 +50,15 @@ interface Request {
 }
 
 export class RestApiHelper {
+  /*
+   * @deprecated - use withConfig
+   */
   static configure(config: Config): void;
   static build(method: string): Request;
+
+  static builder(): RestApiHelper;
+  withConfig(config: any): RestApiHelper;
+  withInterceptor(interceptor: object): RestApiHelper;
 }
 
 export default RestApiHelper;

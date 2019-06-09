@@ -3,8 +3,11 @@ import { isBodyNotAllowed } from './utils';
 import { RestApiHelper } from './RestApiHelper';
 
 export class Request {
-	constructor(config) {
+	isInterceptionEnabled = true;
+
+	constructor(config, name) {
 		this._config = config;
+		this.requestName = name;
 	}
 
 	withHeaders(headers) {
@@ -51,6 +54,11 @@ export class Request {
 		else {
 			throw new Error(`param '{${name}}' does not declared in ${url}`);
 		}
+		return this;
+	}
+
+	shouldBeIntercepted(value = true) {
+		this.isInterceptionEnabled = value;
 		return this;
 	}
 
