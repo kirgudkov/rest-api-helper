@@ -87,10 +87,7 @@ export class RestApiHelper {
 
 	static _decorate(response, isInterceptionEnabled, requestName) {
 		if (RestApiHelper.interceptor && isInterceptionEnabled) {
-			RestApiHelper.interceptor.delegate({
-				status: response.status,
-				meta: response
-			})
+			RestApiHelper.interceptor.delegate(response);
 		}
 
 		if (RestApiHelper._isSuccess(response.status)) {
