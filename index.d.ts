@@ -50,6 +50,10 @@ interface Request {
   fetch(): Promise<Response>;
 }
 
+export interface Interceptor {
+  delegate: (response: Response) => void; 
+}
+
 export class RestApiHelper {
   /*
    * @deprecated - use withConfig
@@ -59,7 +63,7 @@ export class RestApiHelper {
 
   static builder(): RestApiHelper;
   withConfig(config: any): RestApiHelper;
-  withInterceptor(interceptor: object): RestApiHelper;
+  withInterceptor(interceptor: Interceptor): RestApiHelper;
 }
 
 export default RestApiHelper;
