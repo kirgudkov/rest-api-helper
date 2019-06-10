@@ -40,6 +40,7 @@ interface Response {
 interface Request {
   withHeaders(headers: Headers): Request;
   withBody(body: Body): Request;
+  shouldBeIntercepted(value: boolean): Request;
   withQueryParams(params: QueryParams): Request;
   withUrlParam(name: string, value: string | number): Request;
   /*
