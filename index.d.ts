@@ -31,13 +31,13 @@ interface Headers {
   [key: string]: string;
 }
 
-interface Response {
+export interface Response {
   status: number;
   body: any;
   headers: Headers;
 }
 
-interface Request {
+export interface Request {
   withHeaders(headers: Headers): Request;
   withBody(body: Body): Request;
   shouldBeIntercepted(value: boolean): Request;
