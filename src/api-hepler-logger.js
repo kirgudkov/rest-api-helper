@@ -16,7 +16,7 @@ export class Logger {
 	static log(message, log, options) {
 		if (this._option) {
 			try {
-				console.groupCollapsed('%c action', style.thin, message);
+				console.groupCollapsed('%c fetch', style.thin, message);
 			}
 			catch (e) {
 				//that's okay, console.groupCollapsed doesn't supported js engine
