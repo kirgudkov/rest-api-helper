@@ -6,7 +6,7 @@ export function copyObject(obj) {
 }
 
 function getValue(key, value) {
-	return `${key}=${value}`;
+	return `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
 }
 
 export function getQueryParameters(body) {
@@ -65,4 +65,9 @@ export function isTextPlain(headers) {
 
 export function isApplicationJson(headers) {
 	return (headers['content-type'].toLowerCase()).indexOf(APPLICATION_JSON) !== -1;
+}
+
+export function isBodyNotAllowed(method) {
+	const lowerCaseMethod = method.toLowerCase();
+	return lowerCaseMethod === 'get' || lowerCaseMethod === 'head';
 }

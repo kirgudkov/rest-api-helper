@@ -22,29 +22,48 @@ export interface Config {
 }
 
 interface Body {
-  [key: string]: any,
+  [key: string]: any;
 }
+
+type QueryParams = Body;
 
 interface Headers {
-  [key: string]: string,
+  [key: string]: string;
 }
 
-interface Response {
-  status: number,
-  body: any,
-  headers: Headers,
+export interface Response {
+  status: number;
+  body: any;
+  headers: Headers;
 }
 
-interface Request {
-  withHeaders(headers: Headers): Request,
-  withBody(body: Body): Request,
-  withParam(): Request,
-  fetch(): Promise<any>,
+export interface Request {
+  withHeaders(headers: Headers): Request;
+  withBody(body: Body): Request;
+  shouldBeIntercepted(value: boolean): Request;
+  withQueryParams(params: QueryParams): Request;
+  withUrlParam(name: string, value: string | number): Request;
+  /*
+   * @deprecated - use withUrlParam
+   */
+  withParam(name: string, value: string | number): Request;
+  fetch(): Promise<Response>;
+}
+
+export interface Interceptor {
+  delegate: (response: Response) => void; 
 }
 
 export class RestApiHelper {
+  /*
+   * @deprecated - use withConfig
+   */
   static configure(config: Config): void;
   static build(method: string): Request;
+
+  static builder(): RestApiHelper;
+  withConfig(config: any): RestApiHelper;
+  withInterceptor(interceptor: Interceptor): RestApiHelper;
 }
 
 export default RestApiHelper;

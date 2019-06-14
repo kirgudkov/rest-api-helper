@@ -1,13 +1,14 @@
-import { copyObject } from 'rest-api-helper/src/utils';
 import { Logger } from './api-hepler-logger';
 import RFC from '../config/config';
 import { Options } from './Options';
 import { RequestError } from './RequestError';
 import { Request } from './Requst';
-import { isApplicationJson, isTextPlain } from "./utils";
+import { isApplicationJson, isTextPlain, copyObject } from './utils';
 
 export class RestApiHelper {
 	static _config = {};
+
+	static interceptor;
 
 	static configure(config) {
 		RestApiHelper._config = config;
@@ -18,13 +19,29 @@ export class RestApiHelper {
 	static build(url) {
 		if (url) {
 			try {
-				return new Request(copyObject(RestApiHelper._config.request[url]));
+				return new Request(copyObject(RestApiHelper._config.request[url]), url);
 			} catch (e) {
 				throw new Error(e);
 			}
 		} else {
 			throw new Error('You should specify url');
 		}
+	}
+
+	static builder() {
+		return RestApiHelper;
+	}
+
+	static withConfig(config) {
+		RestApiHelper._config = config;
+		Logger.setOption(config.logger);
+		Logger.log('apiHelper[CONFIG]', {config});
+		return RestApiHelper;
+	}
+
+	static withInterceptor(interceptor) {
+		RestApiHelper.interceptor = interceptor;
+		return RestApiHelper;
 	}
 
 	static async fetch(request) {
@@ -35,9 +52,9 @@ export class RestApiHelper {
 		const options = new Options(config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);
 
 		try {
-			Logger.log(`ApiHelper/FETCH (${options.getUrl()}): `, {url: options.getUrl(), ...options.getOptions()});
+			Logger.log(`apiHelper[${(options.getMethod()).toUpperCase()}]	[${options.getRelativeUrl()}]: `, {url: options.getUrl(), ...options.getOptions()});
 			const response = await fetch(options.getUrl(), options.getOptions());
-			Logger.log('ApiHelper/COMPLETE:', {response}, 'blue');
+			Logger.log(`apiHelper[COMPLETE]	[${options.getRelativeUrl()}]:`, {response}, 'blue');
 
 			responseHeaders = RestApiHelper._parseHeaders(response);
 
@@ -49,7 +66,7 @@ export class RestApiHelper {
 				} else {
 					responseBody = await response.formData()
 				}
-				Logger.log('ApiHelper/PARSE:', {
+				Logger.log(`apiHelper[PARSE]	[${options.getRelativeUrl()}]:`, {
 					status: response.status,
 					body: responseBody,
 					headers: responseHeaders
@@ -62,18 +79,22 @@ export class RestApiHelper {
 				status: response.status,
 				body: responseBody,
 				headers: responseHeaders
-			});
+			}, request.isInterceptionEnabled, options.getRelativeUrl());
 		} catch (error) {
 			throw error;
 		}
 	}
 
-	static _decorate(response) {
+	static _decorate(response, isInterceptionEnabled, requestName) {
+		if (RestApiHelper.interceptor && isInterceptionEnabled) {
+			RestApiHelper.interceptor.delegate(response);
+		}
+
 		if (RestApiHelper._isSuccess(response.status)) {
 			return response;
 		}
-		const message = {status: `${response.status} ${RestApiHelper._config.statusDescription[response.status] || config.status[response.status]}`};
-		Logger.log('ApiHelper/ERROR:', message, 'red');
+		const message = {status: `${response.status} ${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`};
+		Logger.log(`apiHelper[ERROR]	[${requestName}]:`, message, 'red');
 
 		throw new RequestError(`${response.status}`, `${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`, JSON.stringify(response.body));
 	}
