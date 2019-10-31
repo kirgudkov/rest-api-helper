@@ -1,5 +1,5 @@
 # REST API Helper
-Simple proxy layer for JavaScript `fetch()`. It helps do some http-requests excluding ugly boilerplate code and pretty cool logs support
+Simple wrapper for JavaScript `fetch()`. It helps do some network things with pretty cool logs and without ugly boilerplate code
 
 > ##### Changelog (0.1.0):
 > - few url param support (f.e: `'get/{type}/{id}'`)
