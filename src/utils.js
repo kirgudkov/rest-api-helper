@@ -32,14 +32,13 @@ export function getFormURLEncodedBody(body) {
 				const key = prefix ? `${prefix}[${property}]` : property;
 				const encodedKey = encodeURIComponent(key);
 				switch (typeof body[property]) {
-					case "object":
+					case 'object':
 						if (Array.isArray(body[property])) {
 							body[property].each((val) => {
 								const encodedValue = encodeURIComponent(val);
-								formBody.push(encodedKey + "[]=" + encodedValue);
+								formBody.push(encodedKey + '[]=' + encodedValue);
 							}, this);
-						}
-						else {
+						} else {
 							formBody = formBody.concat(bodyToPropertiesArray(body[property], property));
 						}
 
@@ -49,18 +48,18 @@ export function getFormURLEncodedBody(body) {
 						break;
 					default:
 						const encodedValue = encodeURIComponent(body[property]);
-						formBody.push(encodedKey + "=" + encodedValue);
+						formBody.push(encodedKey + '=' + encodedValue);
 				}
 			}
 		}
 		return formBody;
 	}
 
-	return bodyToPropertiesArray(body).join("&");
+	return bodyToPropertiesArray(body).join('&');
 }
 
 export function isTextPlain(headers) {
-	return (headers['content-type'].toLowerCase()).indexOf(TEXT_PLAIN) !== -1
+	return (headers['content-type'].toLowerCase()).indexOf(TEXT_PLAIN) !== -1;
 }
 
 export function isApplicationJson(headers) {
@@ -71,3 +70,26 @@ export function isBodyNotAllowed(method) {
 	const lowerCaseMethod = method.toLowerCase();
 	return lowerCaseMethod === 'get' || lowerCaseMethod === 'head';
 }
+
+export function generateTag(length) {
+	let result = '';
+	let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let charactersLength = characters.length;
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+}
+
+export function fillString(str) {
+	let parts = str.split(' ');
+	return parts.map((part, index) => {
+		const partCapacity = (index === 0 || index === 2 ? 14 : 40);
+		for (let i = partCapacity - part.length; i > 0; i--) {
+			part += ' ';
+		}
+
+		return part;
+	}).join('');
+}
+

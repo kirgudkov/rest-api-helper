@@ -3,7 +3,7 @@ import RFC from '../config/config';
 import { Options } from './Options';
 import { RequestError } from './RequestError';
 import { Request } from './Requst';
-import { isApplicationJson, isTextPlain, copyObject } from './utils';
+import { isApplicationJson, isTextPlain, copyObject, generateTag, fillString } from './utils';
 
 export class RestApiHelper {
 	static _config = {};
@@ -13,7 +13,7 @@ export class RestApiHelper {
 	static configure(config) {
 		RestApiHelper._config = config;
 		Logger.setOption(config.logger);
-		Logger.log('ApiHelper/CONFIG', {config});
+		Logger.info('Init helper', {config});
 	}
 
 	static build(url) {
@@ -35,7 +35,7 @@ export class RestApiHelper {
 	static withConfig(config) {
 		RestApiHelper._config = config;
 		Logger.setOption(config.logger);
-		Logger.log('apiHelper[CONFIG]', {config});
+		Logger.info('Init helper', {config});
 		return RestApiHelper;
 	}
 
@@ -45,6 +45,7 @@ export class RestApiHelper {
 	}
 
 	static async fetch(request) {
+		let tag = generateTag(6);
 		let responseBody = {};
 		let responseHeaders = {};
 
@@ -52,50 +53,49 @@ export class RestApiHelper {
 		const options = new Options(config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);
 
 		try {
-			Logger.log(`apiHelper[${(options.getMethod()).toUpperCase()}]	[${options.getRelativeUrl()}]: `, {url: options.getUrl(), ...options.getOptions()});
+			Logger.info(fillString(`${options.getMethod()} ${options.getRelativeUrl()}`), {url: options.getUrl(), ...options.getOptions()}, undefined, tag);
 			const response = await fetch(options.getUrl(), options.getOptions());
-			Logger.log(`apiHelper[COMPLETE]	[${options.getRelativeUrl()}]:`, {response}, 'blue');
 
 			responseHeaders = RestApiHelper._parseHeaders(response);
 
 			try {
 				if (isTextPlain(responseHeaders)) {
-					responseBody = await response.text()
+					responseBody = await response.text();
 				} else if (isApplicationJson(responseHeaders)) {
-					responseBody = await response.json()
+					responseBody = await response.json();
 				} else {
-					responseBody = await response.formData()
+					responseBody = await response.formData();
 				}
-				Logger.log(`apiHelper[PARSE]	[${options.getRelativeUrl()}]:`, {
-					status: response.status,
-					body: responseBody,
-					headers: responseHeaders
-				}, 'green');
 			} catch (error) {
 				/* that's okay. If status 400, for example, it crashes, but that's okay :) Do nothing */
 			}
 
-			return RestApiHelper._decorate({
+			return RestApiHelper._decorate(response,{
 				status: response.status,
 				body: responseBody,
-				headers: responseHeaders
-			}, request.isInterceptionEnabled, options.getRelativeUrl());
+				headers: responseHeaders,
+			}, request.isInterceptionEnabled, options.getRelativeUrl(), tag);
 		} catch (error) {
 			throw error;
 		}
 	}
 
-	static _decorate(response, isInterceptionEnabled, requestName) {
+	static _decorate(response, parsed, isInterceptionEnabled, requestName, tag) {
 		if (RestApiHelper.interceptor && isInterceptionEnabled) {
-			RestApiHelper.interceptor.delegate(response);
+			RestApiHelper.interceptor.delegate(parsed);
 		}
 
-		if (RestApiHelper._isSuccess(response.status)) {
-			return response;
+		if (RestApiHelper._isSuccess(parsed.status)) {
+			Logger.success(fillString(`Complete ${requestName}`), {
+				response,
+				parsed,
+			}, 'green', tag);
+			return parsed;
 		}
-		const message = {status: `${response.status} ${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`};
-		Logger.log(`apiHelper[ERROR]	[${requestName}]:`, message, 'red');
-
+		Logger.error(fillString(`Fail[${parsed.status}] ${requestName}`), {
+			response,
+			parsed,
+		}, 'red', tag);
 		throw new RequestError(`${response.status}`, `${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`, JSON.stringify(response.body));
 	}
 
@@ -112,7 +112,7 @@ export class RestApiHelper {
 					return response.headers;
 				}
 			} else {
-				return {}
+				return {};
 			}
 		}
 	}

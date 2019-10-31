@@ -1,10 +1,13 @@
 const style = Object.freeze({
-	thin: 'font-weight: 100; color: #888',
+	thin: 'font-weight: 100; color: #888; font-size: 10px;',
 	grey: 'color: #aaa',
-	blue: 'color: #3399FF; font-weight: 600',
-	green: 'color: #33CC66; font-weight: 600',
-	red: 'color: #FF3300; font-weight: 600',
+	blue: 'color: #3474e8; font-weight: 600',
+	green: 'color: #2fa73c; font-weight: 600',
+	red: 'color: #EE4D46; font-weight: 600;',
+	redBold: 'color: #EE4D46; font-weight: 400; font-size: 12px; line-height: 20px',
+	greenBold: 'color: #2fa73c; font-weight: 400; font-size: 12px; line-height: 20px',
 	greyBold: 'color: #aaa; font-weight: 600',
+	blackBold: 'color: #333; font-weight: 400; font-size: 12px; line-height: 20px',
 });
 
 export class Logger {
@@ -13,28 +16,33 @@ export class Logger {
 		this._option = option;
 	}
 
-	static log(message, log, options) {
+	static error(message, log, options, tag) {
 		if (this._option) {
-			try {
-				console.groupCollapsed('%c fetch', style.thin, message);
-			}
-			catch (e) {
-				//that's okay, console.groupCollapsed doesn't supported js engine
-			}
+			Logger.log(message, log, options, tag, style.redBold);
+		}
+	}
+
+	static success(message, log, options, tag) {
+		if (this._option) {
+			Logger.log(message, log, options, tag, style.greenBold);
+		}
+	}
+
+	static info(message, log, options, tag) {
+		if (this._option) {
+			Logger.log(message, log, options, tag, style.blackBold);
+		}
+	}
+
+	static log(message, log, options, tag, style) {
+		try {
+			console.groupCollapsed(`%c ${message}	%c ${tag ? `tag: ${tag}` : ''}	 	timestamp: ${new Date().getTime()}`, style.blackBold, style.thin);
 			for (let i in log) {
-				try {
-					console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
-				}
-				catch (e) {
-					//that's okay, console.log doesn't supported js engine
-				}
+				console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
 			}
-			try {
-				console.groupEnd();
-			}
-			catch (e) {
-				//that's okay, console.groupEnd() doesn't supported js engine
-			}
+			console.groupEnd();
+		} catch (e) {
+			console.log(e);
 		}
 	}
 
