@@ -2,7 +2,7 @@ import { Logger } from './api-hepler-logger';
 import RFC from '../config/config';
 import { Options } from './Options';
 import { RequestError } from './RequestError';
-import { Request } from './Requst';
+import { Request } from './Request';
 import { isApplicationJson, isTextPlain, copyObject, generateTag, fillString } from './utils';
 
 export class RestApiHelper {
