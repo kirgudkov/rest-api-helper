@@ -34,9 +34,9 @@ export class Logger {
 		}
 	}
 
-	static log(message, log, options, tag, style) {
+	static log(message, log, options, tag, titleStyle) {
 		try {
-			console.groupCollapsed(`%c ${message}	%c ${tag ? `tag: ${tag}` : ''}	 	timestamp: ${new Date().getTime()}`, style.blackBold, style.thin);
+			console.groupCollapsed(`%c ${message}	%c ${tag ? `tag: ${tag}` : ''}	 	timestamp: ${new Date().getTime()}`, titleStyle, style.thin);
 			for (let i in log) {
 				console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
 			}
