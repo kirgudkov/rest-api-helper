@@ -76,6 +76,10 @@ export class Options {
 			return this.request.body;
 		}
 
+		if (typeof this.request.body === "string") {
+			return this.request.body;
+		}
+
 		if (!this.request.body) {
 			this.request.body = {};
 		}

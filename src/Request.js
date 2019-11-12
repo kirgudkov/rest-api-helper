@@ -22,10 +22,13 @@ export class Request {
 		if (isBodyNotAllowed(this._config.method)) {
 			console.warn('RestApiHelper: Body for GET and HEAD queries is deprecated. Use "withQueryParams" instead');
 		}
-		if (body instanceof FormData || Array.isArray(body)) {
+		if (typeof body === "string") {
+			this._config.body = body
+		}
+		else if (body instanceof FormData || Array.isArray(body)) {
 			this._config.body = body;
 		}
-		else {
+		else if (typeof body === "object") {
 			this._config.body = {
 				...this._config.body,
 				...body,

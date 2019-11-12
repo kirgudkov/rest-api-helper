@@ -39,7 +39,7 @@ export interface Response {
 
 export interface Request {
   withHeaders(headers: Headers): Request;
-  withBody(body: Body): Request;
+  withBody(body: Body | string): Request;
   shouldBeIntercepted(value: boolean): Request;
   withQueryParams(params: QueryParams): Request;
   withUrlParam(name: string, value: string | number): Request;
@@ -51,7 +51,7 @@ export interface Request {
 }
 
 export interface Interceptor {
-  delegate: (response: Response) => void; 
+  delegate: (response: Response) => void;
 }
 
 export class RestApiHelper {
