@@ -96,7 +96,7 @@ export class RestApiHelper {
 			response,
 			parsed,
 		}, 'red', tag);
-		throw new RequestError(`${response.status}`, `${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`, JSON.stringify(response.body));
+		throw new RequestError(`${response.status}`, `${RestApiHelper._config.statusDescription[response.status] || RFC.status[response.status]}`, JSON.stringify(parsed.body));
 	}
 
 	static _isSuccess(status) {
