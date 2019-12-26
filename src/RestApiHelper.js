@@ -28,6 +28,46 @@ export class RestApiHelper {
 		}
 	}
 
+	static makeRequest(method, url) {
+		return new Request({ url, method, headers: {} }, url);
+	}
+
+	static post(url) {
+		return RestApiHelper.makeRequest('post', url);
+	}
+
+	static get(url) {
+		return RestApiHelper.makeRequest('get', url);
+	}
+
+	static put(url) {
+		return RestApiHelper.makeRequest('put', url);
+	}
+
+	static delete(url) {
+		return RestApiHelper.makeRequest('delete', url);
+	}
+
+	static head(url) {
+		return RestApiHelper.makeRequest('head', url);
+	}
+
+	static patch(url) {
+		return RestApiHelper.makeRequest('patch', url);
+	}
+
+	static options(url) {
+		return RestApiHelper.makeRequest('options', url);
+	}
+
+	static trace(url) {
+		return RestApiHelper.makeRequest('trace', url);
+	}
+
+	static connect(url) {
+		return RestApiHelper.makeRequest('connect', url);
+	}
+
 	static builder() {
 		return RestApiHelper;
 	}
@@ -45,7 +85,7 @@ export class RestApiHelper {
 	}
 
 	static async fetch(request) {
-		let tag = generateTag(6);
+		const tag = generateTag(6);
 		let responseBody = {};
 		let responseHeaders = {};
 

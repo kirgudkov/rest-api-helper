@@ -1,24 +1,24 @@
 declare module 'rest-api-helper';
 
 interface RequestConfig {
-  url: string,
-  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch',
-  headers?: Headers,
+  url: string;
+  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch' | 'options' | 'trace' | 'connect' | 'POST' | 'GET' | 'PUT' | 'DELETE' | 'HEAD' | 'PATCH' | 'OPTIONS' | 'TRACE' | 'CONNECT';
+  headers?: Headers;
 }
 
 export interface Config {
-  baseURL: string,
-  logger: boolean,
+  baseURL: string;
+  logger: boolean;
   statusDescription: {
-    [status: number]: string,
-  },
+    [status: number]: string;
+  };
   headers?: {
-    [key: string]: string,
-  },
-  successStatus: number[],
+    [key: string]: string;
+  };
+  successStatus: number[];
   request: {
-    [method: string]: RequestConfig,
-  },
+    [method: string]: RequestConfig;
+  };
 }
 
 interface Body {
@@ -27,7 +27,7 @@ interface Body {
 
 type QueryParams = Body;
 
-interface Headers {
+export interface Headers {
   [key: string]: string;
 }
 
@@ -61,8 +61,18 @@ export class RestApiHelper {
   static configure(config: Config): void;
   static build<T>(method: string): Request<T>;
 
+  static post<T>(url: string): Request<T>;
+  static get<T>(url: string): Request<T>;
+  static put<T>(url: string): Request<T>;
+  static delete<T>(url: string): Request<T>;
+  static head<T>(url: string): Request<T>;
+  static patch<T>(url: string): Request<T>;
+  static options<T>(url: string): Request<T>;
+  static trace<T>(url: string): Request<T>;
+  static connect<T>(url: string): Request<T>;
+
   static builder(): RestApiHelper;
-  withConfig(config: any): RestApiHelper;
+  withConfig(config: Config): RestApiHelper;
   withInterceptor<T>(interceptor: Interceptor<any>): RestApiHelper;
 }
 
