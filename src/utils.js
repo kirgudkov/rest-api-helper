@@ -93,3 +93,13 @@ export function fillString(str) {
 	}).join('');
 }
 
+export function getCurl(request) {
+	let curl = `curl -X ${request.method} \\\n'${request.url}' `;
+	for (const header in request.headers) {
+		curl += `\\\n -H '${header}: ${request.headers[header]}' `;
+	}
+	if (request.body) {
+		curl += `-d '${request.body}'`;
+	}
+	return curl;
+}
