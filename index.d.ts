@@ -38,20 +38,38 @@ export interface Response<T> {
 }
 
 export interface Request<T> {
+
   withHeaders(headers: Headers): Request<T>;
+
   withBody(body: Body | string): Request<T>;
+
   shouldBeIntercepted(value: boolean): Request<T>;
+
   withQueryParams(params: QueryParams): Request<T>;
+
   withUrlParam(name: string, value: string | number): Request<T>;
+
   /*
    * @deprecated - use withUrlParam
    */
   withParam(name: string, value: string | number): Request<T>;
+
   fetch(): Promise<Response<T>>;
 }
 
-export interface Interceptor<T> {
-  delegate: (response: Response<T>) => void;
+export interface Interceptor {
+
+  delegate?: OnInterceptDelegate;
+
+  /*
+   * [401, 403] for example
+   * these statuses will be intercepted
+   */
+  statuses: number[]
+}
+
+export interface OnInterceptDelegate {
+  onIntercept: (request: Request<any>, resolver: (value: PromiseLike<any> | any) => void, response: Response<any>) => void
 }
 
 export class RestApiHelper {
@@ -59,11 +77,14 @@ export class RestApiHelper {
    * @deprecated - use withConfig
    */
   static configure(config: Config): void;
-  static build<T>(method: string): Request<T>;
+
+  static build<T>(path: string): Request<T>;
 
   static builder(): RestApiHelper;
+
   withConfig(config: any): RestApiHelper;
-  withInterceptor<T>(interceptor: Interceptor<any>): RestApiHelper;
+
+  withInterceptor<T>(interceptor: Interceptor): RestApiHelper;
 }
 
 export default RestApiHelper;

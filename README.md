@@ -1,4 +1,4 @@
-# REST API Helper
+# API Helper
 Simple wrapper for JavaScript `fetch()`. It helps do some network things with pretty cool logs and without ugly boilerplate code
 
 > ##### Changelog (0.1.0):
@@ -16,8 +16,15 @@ Simple wrapper for JavaScript `fetch()`. It helps do some network things with pr
 > - mark `RestApiHelper.configure` as deprecated. It's will be removed in next version. Use `RestApiHelper.withConfig` instead 
 > - mark `Request.withParam` as deprecated. It's will be removed in next version. Use `Request.withUrlParam` instead
 
+> ##### Changelog (0.1.5):
+> Response interception:
+> there is two new interfaces `Interceptor` and `OnInterceptDelegate`
+> for example see [Response interception](#response-interception)
+
 ## Installation
     npm install rest-api-helper
+    or
+    yarn add rest-api-helper
 ## Usage
 First thing first you need to configure helper:   
   - Create `your_config.json`
@@ -81,31 +88,62 @@ class Api {
     }
 }
 ```
-- handle errors with interceptor:
+### Response interception
+- Create a class implementing `Interceptor`
+- Specify the statuses you want to intercept:
+
+```typescript
+import { Interceptor, OnInterceptDelegate } from 'rest-api-helper';
+
+export class NetworkResponseInterceptor implements Interceptor {
+
+  public statuses = [401]
+
+  public delegate?: OnInterceptDelegate
+}
 ```
-export class InterceptorImpl {
+
+Then implement OnInterceptDelegate in your networking layer:
+
+```typescript
+import { Interceptor, OnInterceptDelegate } from 'rest-api-helper';
+
+export class NetworkManager implements OnInterceptDelegate {
+  
+  private interceptor: Interceptor = new NetworkResponseInterceptor();
+
   constructor() {
+    this.interceptor.delegate = this;
   }
 
-  public static buildErrorMessage(response) {
-    if (response.body.error && response.body.message) {
-      return `${response.body.error}: ${response.body.message}`;
-    }
-    return 'Server error';
-  }
+  RestApiHelper.builder()
+     .withInterceptor(this.interceptor)
+     .withConfig(api_config);
 
-  public delegate(response) {
-    if (response.status > 200) {
-      alert(Interceptor.buildErrorMessage(response));
-    }
+  public async onIntercept(request: Request<any>, resolver: (value: PromiseLike<any> | any) => void, response: Response<any>) {
+    // each intercepted response with the specified status
+    // fall back here with all data you need (request, response and promise resolver)
+    // intercepted request will be deferred until you call resolver()
+    // this can be used to update the token - call the refreshMyToken() function and then call
+    // resolver ()
+    
+    // eg:
+    this.refresh<RefreshResponse>()
+      .then(async (refreshResponse) => {
+
+         const deferred = await request // <-- here your intercepted request will be called again with new access token
+           .withHeaders({ Authorization: `Bearer ${refreshResponse.body.access_token}` })
+           .fetch();
+ 
+         resolver(deferred); // <-- here your intercepted request will be resolved with new response
+       })
+       .catch(exception => {
+         throw new ...
+       });
   }
 }
+``` 
 
-/*
- * and use withInterceptor when build RestApiHelper
- */
- RestApiHelper.builder().withInterceptor(new InterceptorImpl()).withConfig(config);
-```
 #### Note:
 > Response contains body and headers. If You need to know about response headers, just call `response.headers` besides `response.body`
  - Then call `getSomethingById()` wherever you need. Example:
