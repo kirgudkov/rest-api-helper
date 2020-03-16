@@ -19,7 +19,7 @@ Simple wrapper for JavaScript `fetch()`. It helps do some network things with pr
 > ##### Changelog (0.1.5):
 > Response interception:
 > there is two new interfaces `Interceptor` and `OnInterceptDelegate`
-> for example see [Response interception](#response-interception)
+> for example see [Interception](#interception)
 
 ## Installation
     npm install rest-api-helper
@@ -59,36 +59,42 @@ First thing first you need to configure helper:
  - Declare your requests in "request" property. 
  - Call `RestApiHelper.builder().withConfig(require('your_config.json'));` first
  - Define yor API class. Example:
- ```
+```typescript
 import { RestApiHelper } from 'rest-api-helper';
 import config from './config';
 
-class Api { 
+class NetworkManager { 
+
     constructor() {
-        RestApiHelper.configure(require('config.json'));
+        RestApiHelper.builder()
+            .withConfig(require('config.json')));
     }
     
-    async getSomethingById(body, id, token) {
-        const response = await RestApiHelper
-            .build('getSomethingById')
-            .withBody(body)
-            .withUrlParam('id', id)
-            .withHeaders({'Authorization': token})
-            .fetch();
-        return new SomeResponse(response.body);
+     public getSomethingById<T>(body: Body, id: string, token: string): Promise<Response<T>> {
+        try {
+           return await RestApiHelper.build<T>('getSomethingById')
+              .withBody(body)
+              .withUrlParam('id', id)
+              .withHeaders({'Authorization': token})
+              .fetch();
+         } catch (exception) {
+            throw new CustomException(exception);
+         }
     }
 
-    async getSomethingWithQuery(userId, token) {
-        const response = await RestApiHelper
-            .build('getSomethingWithQuery')
+    async getSomethingWithQuery<T>(userId, token): Promise<Response<T>> {
+        try {
+          return await RestApiHelper.build<T>('getSomethingWithQuery')
             .withQueryParams({ userId })
             .withHeaders({'Authorization': token})
-            .fetch();
-        return new SomeResponse(response.body);
+            .fetch()
+        } catch(exception) {
+          throw new CustomException(exception);
+        }
     }
 }
 ```
-### Response interception
+### Interception
 - Create a class implementing `Interceptor`
 - Specify the statuses you want to intercept:
 
@@ -143,19 +149,19 @@ export class NetworkManager implements OnInterceptDelegate {
   }
 }
 ``` 
-
-#### Note:
 > Response contains body and headers. If You need to know about response headers, just call `response.headers` besides `response.body`
  - Then call `getSomethingById()` wherever you need. Example:
  ```
-api.getSomethingById(body, id, token).then(response => {
-	// do something
-}).catch(error => { /* handle error */ });
+networkManager.getSomethingById<ResponseDataObject>(body, id, token)
+    .then(response => { // response is ResponseDataObject because generic
+	    // do something
+    })
+    .catch(exception => { /* handle error */ });
 ```
 
 > - Statuses that are not listed as `“successStatus”` in `config.json` will be thrown into `catch()`
 
-####`multipart/form-data` example:
+### `multipart/form-data` example:
  ```
 async uploadPhoto(file: File) {
     const formData = new FormData();
