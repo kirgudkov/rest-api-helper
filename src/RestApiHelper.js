@@ -28,9 +28,49 @@ export class RestApiHelper {
     }
   }
 
-  static builder() {
-    return RestApiHelper;
-  }
+	static makeRequest(method, url) {
+		return new Request({ url, method, headers: {} }, url);
+	}
+
+	static post(url) {
+		return RestApiHelper.makeRequest('post', url);
+	}
+
+	static get(url) {
+		return RestApiHelper.makeRequest('get', url);
+	}
+
+	static put(url) {
+		return RestApiHelper.makeRequest('put', url);
+	}
+
+	static delete(url) {
+		return RestApiHelper.makeRequest('delete', url);
+	}
+
+	static head(url) {
+		return RestApiHelper.makeRequest('head', url);
+	}
+
+	static patch(url) {
+		return RestApiHelper.makeRequest('patch', url);
+	}
+
+	static options(url) {
+		return RestApiHelper.makeRequest('options', url);
+	}
+
+	static trace(url) {
+		return RestApiHelper.makeRequest('trace', url);
+	}
+
+	static connect(url) {
+		return RestApiHelper.makeRequest('connect', url);
+	}
+
+	static builder() {
+		return RestApiHelper;
+	}
 
   static withConfig(config) {
     RestApiHelper._config = config;
@@ -44,10 +84,10 @@ export class RestApiHelper {
     return RestApiHelper;
   }
 
-  static async fetch(request) {
-    let tag = generateTag(6);
-    let responseBody = {};
-    let responseHeaders = {};
+	static async fetch(request) {
+		const tag = generateTag(6);
+		let responseBody = {};
+		let responseHeaders = {};
 
     const config = typeof request === 'object' ? request._config : RestApiHelper._config.request[request];
     const options = new Options(config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);

@@ -214,3 +214,10 @@ just put full url string in "url" property, like:
     console.log(error.message); // response body, for example:  {error: 'Authorization has expired'}
 });
 ```
+
+
+### Request creating without description in config file: 
+```
+const request = RestApiHelper.post(url) // or get, put ...
+```
+Now you can use all request's methods, like `withHeaders`, `withBody` and etc.

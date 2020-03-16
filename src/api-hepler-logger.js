@@ -1,3 +1,5 @@
+import {getCurl} from './utils';
+
 const style = Object.freeze({
 	thin: 'font-weight: 100; color: #888; font-size: 10px;',
 	grey: 'color: #aaa',
@@ -39,6 +41,12 @@ export class Logger {
 			console.groupCollapsed(`%c ${message}	%c ${tag ? `tag: ${tag}` : ''}	 	timestamp: ${new Date().getTime()}`, titleStyle, style.thin);
 			for (let i in log) {
 				console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
+			}
+			if (log.method) {
+				const curl = getCurl(log);
+				console.groupCollapsed('%c curl', style.greyBold);
+				console.log(curl);
+				console.groupEnd();
 			}
 			console.groupEnd();
 		} catch (e) {
