@@ -82,7 +82,7 @@ class NetworkManager {
          }
     }
 
-    async getSomethingWithQuery<T>(userId, token): Promise<Response<T>> {
+    public async getSomethingWithQuery<T>(userId, token): Promise<Response<T>> {
         try {
           return await RestApiHelper.build<T>('getSomethingWithQuery')
             .withQueryParams({ userId })
@@ -151,7 +151,7 @@ export class NetworkManager implements OnInterceptDelegate {
 ``` 
 > Response contains body and headers. If You need to know about response headers, just call `response.headers` besides `response.body`
  - Then call `getSomethingById()` wherever you need. Example:
- ```
+ ```typescript
 networkManager.getSomethingById<ResponseDataObject>(body, id, token)
     .then(response => { // response is ResponseDataObject because generic
 	    // do something
@@ -162,7 +162,7 @@ networkManager.getSomethingById<ResponseDataObject>(body, id, token)
 > - Statuses that are not listed as `“successStatus”` in `config.json` will be thrown into `catch()`
 
 ### `multipart/form-data` example:
- ```
+ ```javascript
 async uploadPhoto(file: File) {
     const formData = new FormData();
     
@@ -197,9 +197,11 @@ async uploadPhoto(file: File) {
 ##### Important for React-Native:
 > Logger might produce crashes at release builds or in debugger-off mode. 
 Because that kind of logs supported only in V8 engine. We recommend use this hack before `RestApiHelper.config()`:
-```
+```javascript
 config.logger = __DEV__ && Boolean(global.origin);
-RestApiHelper.builder().withConfig(config);
+
+RestApiHelper.builder()
+  .withConfig(config);
 ```
 > Then logger will be working only in dev mode and debug-on mode   
 
@@ -213,7 +215,7 @@ just put full url string in "url" property, like:
 }
 ```
 - If request throws error associated with an unsuccessful status (like 500), You can parse it and handle. For example:
-```
+```javascript
 ...}).catch(error => {
     console.log(error.name); // "bad" status, like 401
     console.log(error.description); // description, like "Invalid token"
@@ -223,7 +225,7 @@ just put full url string in "url" property, like:
 
 
 ### Request creating without description in config file: 
-```
+```javascript
 const request = RestApiHelper.post(url) // or get, put ...
 ```
 Now you can use all request's methods, like `withHeaders`, `withBody` and etc.
