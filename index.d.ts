@@ -2,7 +2,7 @@ declare module 'rest-api-helper';
 
 interface RequestConfig {
   url: string;
-  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch' | 'options' | 'trace' | 'connect' | 'POST' | 'GET' | 'PUT' | 'DELETE' | 'HEAD' | 'PATCH' | 'OPTIONS' | 'TRACE' | 'CONNECT';
+  method: 'post' | 'get' | 'put' | 'delete' | 'head' | 'patch' | 'options' | 'trace' | 'connect' | 'POST' | 'GET' | 'PUT' | 'DELETE' | 'HEAD' | 'PATCH' | 'OPTIONS' | 'TRACE' | 'CONNECT' | string;
   headers?: Headers;
 }
 
