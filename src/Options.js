@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import { getQueryParameters, getFormURLEncodedBody, isBodyNotAllowed } from './utils';
 import RFC from '../config/config';
 

@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import { isBodyNotAllowed } from './utils';
 import { RestApiHelper } from './RestApiHelper';
 
