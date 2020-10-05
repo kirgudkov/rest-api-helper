@@ -20,6 +20,10 @@ Simple wrapper for JavaScript `fetch()`. It helps do some network things with pr
 > Response interception:
 > there is two new interfaces `Interceptor` and `OnInterceptDelegate`
 > for example see [Interception](#interception)
+>
+> ##### Changelog (0.1.53):
+> added AbortController to abort fetch
+> for example see [AbortController](#AbortController)
 
 ## Installation
     npm install rest-api-helper
@@ -107,6 +111,24 @@ export class NetworkResponseInterceptor implements Interceptor {
 
   public delegate?: OnInterceptDelegate
 }
+```
+
+### AbortController
+
+```typescript
+let controller = new AbortController()
+
+try {
+  return await RestApiHelper.build<T>('getSomethingWithQuery')
+    .withAbortController(controller)
+    .fetch()
+} catch(exception) {
+  throw new CustomException(exception);
+}
+
+//...
+
+controller.abort()
 ```
 
 Then implement OnInterceptDelegate in your networking layer:

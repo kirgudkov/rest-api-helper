@@ -1,3 +1,4 @@
+import FormData from 'form-data';
 import { isBodyNotAllowed } from './utils';
 import { RestApiHelper } from './RestApiHelper';
 
@@ -57,6 +58,11 @@ export class Request {
 			throw new Error(`param '{${name}}' does not declared in ${url}`);
 		}
 		return this;
+	}
+
+	withAbortController(controller) {
+		this._config.controller = controller
+		return this
 	}
 
 	shouldBeIntercepted(value = true) {

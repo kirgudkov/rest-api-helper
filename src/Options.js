@@ -1,3 +1,4 @@
+import FormData from 'form-data';
 import { getQueryParameters, getFormURLEncodedBody, isBodyNotAllowed } from './utils';
 import RFC from '../config/config';
 
@@ -40,6 +41,7 @@ export class Options {
 			url: this.getUrl(this.request.url),
 			headers: this.getHeaders(this.request.headers),
 			body: this.getBody(this.request.body),
+			signal: this.request.controller.signal
 		};
 	}
 

@@ -43,6 +43,8 @@ export interface Request<T> {
 
   withBody(body: Body | string): Request<T>;
 
+  withAbortController(abortController: AbortController): Request<T>;
+
   shouldBeIntercepted(value: boolean): Request<T>;
 
   withQueryParams(params: QueryParams): Request<T>;
