@@ -41,7 +41,7 @@ export class Options {
 			url: this.getUrl(this.request.url),
 			headers: this.getHeaders(this.request.headers),
 			body: this.getBody(this.request.body),
-			signal: this.request.controller.signal
+			signal: this.request.controller?.signal
 		};
 	}
 
