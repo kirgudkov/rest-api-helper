@@ -20,8 +20,8 @@ Simple wrapper for JavaScript `fetch()`. It helps do some network things with pr
 > Response interception:
 > there is two new interfaces `Interceptor` and `OnInterceptDelegate`
 > for example see [Interception](#interception)
->
-> ##### Changelog (0.1.53):
+
+> ##### Changelog (0.1.54):
 > added AbortController to abort fetch
 > for example see [AbortController](#AbortController)
 
