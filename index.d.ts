@@ -37,6 +37,13 @@ export interface Response<T> {
   headers: Headers;
 }
 
+export interface RequestError extends Error {
+  name: string
+  description: string
+  message: string
+  headers: string
+}
+
 export interface Request<T> {
 
   withHeaders(headers: Headers): Request<T>;
