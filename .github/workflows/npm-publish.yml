@@ -19,6 +19,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           commit-message: 'CI: bumps version to {{version}}'
+          minor-wording: 'minor'
+          major-wording: 'major'
+          patch-wording: 'patch,fixes,fix,feat,feature,fixed'
 
       - name: Publish to npm
         uses: JS-DevTools/npm-publish@v1
