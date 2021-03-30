@@ -6,7 +6,11 @@ export function copyObject(obj) {
 }
 
 function getValue(key, value) {
-	return `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+	if (Array.isArray(value)) {
+		return value.map(i => `${encodeURIComponent(key)}[]=${encodeURIComponent(i)}`).join('&')
+	} else {
+		return `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+	}
 }
 
 export function getQueryParameters(body) {
