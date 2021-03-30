@@ -6,8 +6,8 @@ on:
       - master
 
 jobs:
-  bump-version:
-    name: bump-version
+  npm-publish:
+    name: npm-publish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,13 +19,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           commit-message: 'CI: bumps version to {{version}}'
-  npm-publish:
-    name: npm-publish
-    needs: bump-version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
 
       - name: Publish to npm
         uses: JS-DevTools/npm-publish@v1
