@@ -10,20 +10,20 @@ jobs:
     name: npm-publish
     runs-on: ubuntu-latest
     steps:
-      - name: 'Automated Version Bump'
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: 'Version Bump'
         uses: 'phips28/gh-action-bump-version@master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           target-branch: 'master'
           commit-message: 'CI: bumps version to {{version}} [skip ci]'
-      - name: Checkout repository
-        uses: actions/checkout@master
       - name: Set up Node.js
         uses: actions/setup-node@master
         with:
           node-version: 11.4
-      - name: Publish if version has been updated
+      - name: Publish to npm
         uses: pascalgn/npm-publish-action@51fdb4531e99aac1873764ef7271af448dc42ab4
         with:
           tag_name: "v%s"
