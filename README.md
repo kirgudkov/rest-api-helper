@@ -1,6 +1,8 @@
 # API Helper
 Wrapped JavaScript `fetch()`. It helps do some network things with pretty cool logs and without ugly boilerplate code
 
+![npm-publish](https://github.com/KirillGudkov/rest-api-helper/actions/workflows/npm-publish.yml/badge.svg)
+
 > ##### Changelog (0.1.0):
 > - few url param support (f.e: `'get/{type}/{id}'`)
 > - "headers" property is not required in `config.json`
