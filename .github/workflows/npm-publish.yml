@@ -6,14 +6,9 @@ on:
       - master
 
 jobs:
-  bump-version:
-    name: bump-version
+  npm-publish:
+    name: npm-publish
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [11.x]
-
     steps:
       - name: 'Automated Version Bump'
         uses: 'phips28/gh-action-bump-version@master'
@@ -22,11 +17,6 @@ jobs:
         with:
           target-branch: 'master'
           commit-message: 'CI: bumps version to {{version}} [skip ci]'
-
-  npm-publish:
-    name: npm-publish
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout repository
         uses: actions/checkout@master
       - name: Set up Node.js
