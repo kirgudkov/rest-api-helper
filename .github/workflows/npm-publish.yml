@@ -12,13 +12,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: 'Version Bump'
+        uses: phips28/gh-action-bump-version@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          commit-message: 'CI: bumps version to {{version}}'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Publish to npm
         uses: pascalgn/npm-publish-action@1.3.7
         with:
           tag_name: "v%s"
           tag_message: "v%s"
           commit_pattern: "^Release (\\S+)"
-          publish_command: "yarn"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }}
