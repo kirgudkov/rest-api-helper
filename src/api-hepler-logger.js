@@ -6,10 +6,10 @@ const style = Object.freeze({
 	blue: 'color: #3474e8; font-weight: 600',
 	green: 'color: #2fa73c; font-weight: 600',
 	red: 'color: #EE4D46; font-weight: 600;',
-	redBold: 'color: #EE4D46; font-weight: 400; font-size: 12px; line-height: 20px',
-	greenBold: 'color: #2fa73c; font-weight: 400; font-size: 12px; line-height: 20px',
+	redBold: 'color: #EE4D46; font-weight: 600; font-size: 12px; line-height: 16px',
+	greenBold: 'color: #2fa73c; font-weight: 600; font-size: 12px; line-height: 16px',
 	greyBold: 'color: #aaa; font-weight: 600',
-	blackBold: 'color: #333; font-weight: 400; font-size: 12px; line-height: 20px',
+	blackBold: 'color: #333; font-weight: 600; font-size: 12px; line-height: 16px',
 });
 
 export class Logger {
@@ -38,7 +38,8 @@ export class Logger {
 
 	static log(message, log, options, tag, titleStyle) {
 		try {
-			console.groupCollapsed(`%c ${message}	%c ${tag ? `tag: ${tag}` : ''}	 	timestamp: ${new Date().getTime()}`, titleStyle, style.thin);
+			const date = new Date()
+			console.groupCollapsed(`%c ${message} %c @ ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`, titleStyle, style.thin);
 			for (let i in log) {
 				console.log(` %c${Logger.getTitle(i)}`, style[options] || style.greyBold, log[i]);
 			}

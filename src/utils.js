@@ -86,6 +86,9 @@ export function generateTag(length) {
 }
 
 export function fillString(str) {
+	return str
+
+	// disabled so far. annoying
 	let parts = str.split(' ');
 	return parts.map((part, index) => {
 		const partCapacity = (index === 0 || index === 2 ? 14 : 40);

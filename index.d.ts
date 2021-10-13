@@ -28,7 +28,7 @@ interface Body {
 type QueryParams = Body;
 
 export interface Headers {
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
 export interface Response<T> {
@@ -87,7 +87,7 @@ export class RestApiHelper {
    */
   static configure(config: Config): void;
 
-  static build<T>(path: string): Request<T>;
+  static build<T = void>(endpoint: string | number): Request<T>;
 
   static post<T>(url: string): Request<T>;
 
