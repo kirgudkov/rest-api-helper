@@ -89,23 +89,23 @@ export class RestApiHelper {
 
   static build<T = void>(endpoint: string | number): Request<T>;
 
-  static post<T>(url: string): Request<T>;
+  static post<T = void>(url: string): Request<T>;
 
-  static get<T>(url: string): Request<T>;
+  static get<T = void>(url: string): Request<T>;
 
-  static put<T>(url: string): Request<T>;
+  static put<T = void>(url: string): Request<T>;
 
-  static delete<T>(url: string): Request<T>;
+  static delete<T = void>(url: string): Request<T>;
 
-  static head<T>(url: string): Request<T>;
+  static head<T = void>(url: string): Request<T>;
 
-  static patch<T>(url: string): Request<T>;
+  static patch<T = void>(url: string): Request<T>;
 
-  static options<T>(url: string): Request<T>;
+  static options<T = void>(url: string): Request<T>;
 
-  static trace<T>(url: string): Request<T>;
+  static trace<T = void>(url: string): Request<T>;
 
-  static connect<T>(url: string): Request<T>;
+  static connect<T = void>(url: string): Request<T>;
 
   static builder(): RestApiHelper;
 
