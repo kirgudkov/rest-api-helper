@@ -142,8 +142,8 @@ export class RestApiHelper {
         }, undefined, tag);
         if (RestApiHelper.interceptor.delegate) {
           if (RestApiHelper.interceptor.delegate.onIntercept) {
-            return new Promise(resolve => {
-              RestApiHelper.interceptor.delegate.onIntercept(request, resolve, parsed);
+            return new Promise((resolve, reject) => {
+              RestApiHelper.interceptor.delegate.onIntercept(request, resolve, reject, parsed);
             });
           } else {
             console.error('RestApiHelper.interceptor.delegate.onIntercept is undefined. You must have forgot to implement OnInterceptDelegate interface')

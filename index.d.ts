@@ -78,7 +78,7 @@ export interface Interceptor {
 }
 
 export interface OnInterceptDelegate {
-  onIntercept: (request: Request<any>, resolver: (value: PromiseLike<any> | any) => void, response: Response<any>) => void
+  onIntercept: (request: Request<any>, resolver: (value: PromiseLike<any> | any) => void, reject: (reason: any) => void, response: Response<any>) => void
 }
 
 export class RestApiHelper {
