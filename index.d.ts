@@ -44,7 +44,13 @@ export interface RequestError extends Error {
   headers: string
 }
 
+type Options = {
+  get url(): string
+}
+
 export interface Request<T> {
+
+  get options(): Options
 
   withHeaders(headers: Headers): Request<T>;
 

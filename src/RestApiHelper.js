@@ -29,11 +29,15 @@ export class RestApiHelper {
   }
 
   static makeRequest(method, url) {
-    return new Request({
+    const request = new Request({
       url,
       method,
       headers: {}
     }, url);
+
+    request.options = new Options(request._config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);
+
+    return request
   }
 
   static post(url) {

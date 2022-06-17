@@ -12,6 +12,10 @@ export class Options {
 		this._globalHeaders = headers;
 	}
 
+	get url() {
+		return this.getUrl()
+	}
+
 	setRequest(request) {
 		if (request.method === '') {
 			throw new Error(`Method can't be empty string`);
