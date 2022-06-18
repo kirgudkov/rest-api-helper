@@ -140,20 +140,32 @@ export class RestApiHelper {
 
     if (RestApiHelper.interceptor && isInterceptionEnabled) {
       if (RestApiHelper.interceptor.statuses.indexOf(parsed.status) !== -1) {
-        Logger.info(fillString(`→ Intercepted: ${request._config.url}`), {
-          response,
-          parsed,
-        }, undefined, tag);
+        Logger.info(fillString(`→ Intercepted: ${request._config.url}`), { response, parsed }, undefined, tag)
+
         if (RestApiHelper.interceptor.delegate) {
           if (RestApiHelper.interceptor.delegate.onIntercept) {
-            return new Promise((resolve, reject) => {
-              RestApiHelper.interceptor.delegate.onIntercept(request, resolve, reject, parsed);
-            });
+            if (typeof RestApiHelper.interceptor.delegate.onIntercept !== 'function') {
+              console.error('Seems like onIntercept is not a function')
+            } else {
+              return new Promise((resolve, reject) => {
+                RestApiHelper.interceptor.delegate.onIntercept(request, resolve, reject, parsed)
+              })
+            }
           } else {
-            console.error('RestApiHelper.interceptor.delegate.onIntercept is undefined. You must have forgot to implement OnInterceptDelegate interface')
+            console.error(`onIntercept is undefined. Seems like you haven't implemented OnInterceptDelegate interface`)
           }
         } else {
-          console.error('RestApiHelper.interceptor.delegate is undefined. You must have forgot to define it: this.interceptor.delegate = this;')
+          if (RestApiHelper.interceptor.onIntercept) {
+            if (typeof RestApiHelper.interceptor.onIntercept !== 'function') {
+              console.error('Seems like onIntercept is not a function')
+            } else {
+              return new Promise((resolve, reject) => {
+                RestApiHelper.interceptor.onIntercept(request, resolve, reject, parsed)
+              })
+            }
+          } else {
+            console.error(`onIntercept is undefined. Seems like you haven't implemented OnInterceptDelegate interface`)
+          }
         }
       }
     }
