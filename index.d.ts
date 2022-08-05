@@ -83,6 +83,14 @@ export interface Interceptor {
   statuses: number[]
 }
 
+export interface RestApiHelperLogger {
+  info(message: string, log: { [key: string]: any })
+
+  success(message: string, log: { [key: string]: any })
+
+  error(message: string, log: { [key: string]: any })
+}
+
 export interface OnInterceptDelegate {
   onIntercept: (request: Request<any>, resolver: (value: PromiseLike<any> | any) => void, reject: (reason: any) => void, response: Response<any>) => void
 }
@@ -118,6 +126,8 @@ export class RestApiHelper {
   withInterceptor<T>(interceptor: Interceptor): RestApiHelper;
 
   withConfig(config: Config): RestApiHelper;
+
+  withLogger(logger: RestApiHelperLogger): RestApiHelper;
 }
 
-export default RestApiHelper;
+export default RestApiHelper

@@ -227,6 +227,51 @@ config.logger = __DEV__ && Boolean(global.origin);
 RestApiHelper.builder()
   .withConfig(config);
 ```
+
+### Custom Logger:
+
+```
+RestApiHelper.builder()
+  ...
+  .withLogger(new Logger());
+```
+
+`Logger` have to implement `RestApiHelperLogger` interface
+
+Example:
+```typescript
+import { RestApiHelperLogger } from 'rest-api-helper'
+
+export class Logger implements RestApiHelperLogger {
+
+  constructor(private enabled: boolean, private filters: string[]) {}
+
+  error(message: string, log: { [key: string]: any }) {
+    this.log(`❌ ${message}`, log)
+  }
+
+  info(message: string, log: { [key: string]: any }) {
+    this.log(`➡️  ${message}`, log)
+  }
+
+  success(message: string, log: { [key: string]: any }) {
+    this.log(`⬅️  ${message}`, log)
+  }
+
+  private log(message: string, log: { [key: string]: any }) {
+    if (this.enabled) {
+      console.log(message)
+      // In case if you need to show verbose logs only for specific endpoint or smth
+      if (this.filters.some(filter => message.includes(filter))) {
+        for (const logKey in log) {
+          console.log(logKey, log[logKey])
+        }
+      }
+    }
+  }
+}
+```
+
 > Then logger will be working only in dev mode and debug-on mode   
 
 ## Specific url:

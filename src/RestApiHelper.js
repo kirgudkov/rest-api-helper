@@ -9,11 +9,11 @@ export class RestApiHelper {
   static _config = {};
 
   static interceptor;
+  static logger = Logger;
 
   static configure(config) {
     RestApiHelper._config = config;
     Logger.setOption(config.logger);
-    Logger.info('Init helper', {config});
   }
 
   static build(url) {
@@ -83,7 +83,11 @@ export class RestApiHelper {
   static withConfig(config) {
     RestApiHelper._config = config;
     Logger.setOption(config.logger);
-    Logger.info('Init helper', {config});
+    return RestApiHelper;
+  }
+
+  static withLogger(logger) {
+    RestApiHelper.logger = logger;
     return RestApiHelper;
   }
 
@@ -101,7 +105,7 @@ export class RestApiHelper {
     const options = new Options(config, RestApiHelper._config.baseURL, RestApiHelper._config.headers);
 
     try {
-      Logger.info(fillString(`${options.getMethod()} ${options.getRelativeUrl()}`), {url: options.getUrl(), ...options.getOptions()}, undefined, tag);
+      RestApiHelper.logger.info(fillString(`${options.getMethod()} ${options.getRelativeUrl()}`), {url: options.getUrl(), ...options.getOptions()}, undefined, tag);
       const response = await fetch(options.getUrl(), options.getOptions());
 
       responseHeaders = RestApiHelper._parseHeaders(response);
@@ -130,7 +134,7 @@ export class RestApiHelper {
 
   static _decorate(response, parsed, isInterceptionEnabled, requestName, tag, request) {
     if (RestApiHelper._isSuccess(parsed.status)) {
-      Logger.success(fillString(`Complete ${requestName}`), {
+      RestApiHelper.logger.success(fillString(`Complete ${requestName}`), {
         response,
         parsed,
       }, 'green', tag);
@@ -140,7 +144,7 @@ export class RestApiHelper {
 
     if (RestApiHelper.interceptor && isInterceptionEnabled) {
       if (RestApiHelper.interceptor.statuses.indexOf(parsed.status) !== -1) {
-        Logger.info(fillString(`→ Intercepted: ${request._config.url}`), { response, parsed }, undefined, tag)
+        RestApiHelper.logger.info(fillString(`→ Intercepted: ${request._config.url}`), { response, parsed }, undefined, tag)
 
         if (RestApiHelper.interceptor.delegate) {
           if (RestApiHelper.interceptor.delegate.onIntercept) {
@@ -170,7 +174,7 @@ export class RestApiHelper {
       }
     }
 
-    Logger.error(fillString(`Fail[${parsed.status}] ${requestName}`), {
+    RestApiHelper.logger.error(fillString(`Fail[${parsed.status}] ${requestName}`), {
       response,
       parsed,
     }, 'red', tag);
