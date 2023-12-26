@@ -7,7 +7,7 @@ export function copyObject(obj) {
 
 function getValue(key, value) {
 	if (Array.isArray(value)) {
-		return value.map(i => `${encodeURIComponent(key)}[]=${encodeURIComponent(i)}`).join('&')
+		return value.map(i => `${encodeURIComponent(`${key}[]=`)}${encodeURIComponent(i)}`).join('&')
 	} else {
 		return `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
 	}
