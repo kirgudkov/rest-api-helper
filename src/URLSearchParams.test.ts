@@ -22,7 +22,17 @@ describe("URLSearchParams", () => {
     params.append("foo", "bar");
     params.append("foo", "baz");
 
-    expect(params.toString()).toBe("foo=bar&foo=baz");
+    expect(params.toString()).toBe("foo[]=bar&foo[]=baz");
+  });
+
+  it("should append multiple parameters with []", () => {
+    const params = new URLSearchParams();
+
+    params.append("a", "a");
+    params.append("foo", "b");
+    params.append("foo", "c");
+
+    expect(params.toString()).toBe("a=a&foo[]=b&foo[]=c");
   });
 
   it("should get a parameter", () => {

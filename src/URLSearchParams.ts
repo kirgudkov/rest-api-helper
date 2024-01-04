@@ -25,6 +25,14 @@ export class URLSearchParams {
   toString(): string {
     let paramString = "";
     this.params.forEach((values, key) => {
+      if (values.length > 1) {
+        values.forEach(value => {
+          paramString += `${paramString ? "&" : ""}${encodeURIComponent(key)}[]=${encodeURIComponent(value)}`;
+        });
+
+        return;
+      }
+
       values.forEach(value => {
         paramString += `${paramString ? "&" : ""}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
       });
