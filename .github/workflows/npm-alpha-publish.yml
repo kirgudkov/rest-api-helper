@@ -9,20 +9,21 @@ jobs:
   check_commit_message:
     runs-on: ubuntu-latest
     outputs:
-      trigger_next: ${{ steps.commit-message-check.outputs.trigger_next }}
+      trigger_next: ${{ steps.set_output.outputs.trigger_next }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
       - name: Check commit message
-        id: commit-message-check
+        id: check_commit
         run: |
           commit_message=$(git log -1 --pretty=%B)
           echo "Commit message: $commit_message"
+          echo "TRIGGER_NEXT=false" >> $GITHUB_ENV
           if [[ "$commit_message" == *"publish"* ]]; then
-            echo "::set-output name=trigger_next::true"
-          else
-            echo "::set-output name=trigger_next::false"
-          fi
+            echo "TRIGGER_NEXT=true" >> $GITHUB_ENV
+      - name: Set output
+        id: set_output
+        run: echo "::set-output name=trigger_next::$TRIGGER_NEXT"
 
   npm-publish:
     needs: check_commit_message
