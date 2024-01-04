@@ -61,7 +61,7 @@ describe("index", () => {
 
     const response = await client.perform(request);
 
-    expect(request.url.protocol).toBe("https:");
+    expect(request.url.protocol).toBe("https");
     expect(request.url.host).toBe("example.com");
     expect(interceptor.onResponse).toHaveBeenCalledTimes(1);
 

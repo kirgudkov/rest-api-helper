@@ -18,12 +18,12 @@ describe("Request", () => {
 
   it("should set the base url", () => {
     request.setBaseURL("https://localhost");
-    expect(request.url.protocol).toBe("https:");
+    expect(request.url.protocol).toBe("https");
     expect(request.url.host).toBe("localhost");
     expect(request.url.pathname).toBe(path);
 
     request.setBaseURL("ftp://files");
-    expect(request.url.protocol).toBe("ftp:");
+    expect(request.url.protocol).toBe("ftp");
     expect(request.url.host).toBe("files");
   });
 

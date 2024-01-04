@@ -1,12 +1,12 @@
-import { URL } from "url";
+import { URL } from "./URL";
 
 class Request {
-  public static readonly DEFAULT_PROTOCOL = "http:";
+  public static readonly DEFAULT_PROTOCOL = "http";
   public static readonly DEFAULT_HOST = "host.com";
 
   public readonly method: string;
   public readonly headers: Record<string, string> = {};
-  public readonly url = new URL(`${Request.DEFAULT_PROTOCOL}//${Request.DEFAULT_HOST}`);
+  public readonly url = new URL(`${Request.DEFAULT_PROTOCOL}://${Request.DEFAULT_HOST}`);
 
   public isInterceptionAllowed = true;
   public body: BodyInit | null = null;
