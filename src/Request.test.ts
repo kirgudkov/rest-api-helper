@@ -53,10 +53,15 @@ describe("Request", () => {
 
   it("should set multiple headers", () => {
     request.setHeaders({
+      "Content-Type": "application/json",
+      "accept": "application/json"
+    });
+
+    expect(Object.keys(request.headers).length).toBe(2);
+    expect(request.headers).toEqual({
       "content-type": "application/json",
       "accept": "application/json"
     });
-    expect(Object.keys(request.headers).length).toBe(2);
   });
 
   it("should ignore case when setting headers", () => {
@@ -74,7 +79,7 @@ describe("Request", () => {
 
     request.setDefaultHeaders({
       "content-type": "multipart/form-data",
-      "cache-control": "no-cache"
+      "Cache-Control": "no-cache"
     });
 
     expect(Object.keys(request.headers).length).toBe(3);

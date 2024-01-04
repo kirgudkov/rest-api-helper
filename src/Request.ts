@@ -42,11 +42,11 @@ class Request {
   };
 
   setDefaultHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(item => {
-      const key = item.toLowerCase();
+    Object.keys(headers).forEach(rawKey => {
+      const formattedKey = rawKey.toLowerCase();
 
-      if (!this.headers[key]) {
-        this.headers[key] = headers[key];
+      if (!this.headers[formattedKey]) {
+        this.headers[formattedKey] = headers[rawKey];
       }
     });
 
@@ -54,9 +54,9 @@ class Request {
   };
 
   setHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(item => {
-      const key = item.toLowerCase();
-      this.headers[key] = headers[key];
+    Object.keys(headers).forEach(rawKey => {
+      const formattedKey = rawKey.toLowerCase();
+      this.headers[formattedKey] = headers[rawKey];
     });
 
     return this;
