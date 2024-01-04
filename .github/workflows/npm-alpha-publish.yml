@@ -39,8 +39,11 @@ jobs:
       - name: npm install
         run: npm install
 
+      - name: build
+        run: npm run build
+
       - name: test
-        run: npm test
+        run: npm run test
 
       - name: publish
         uses: JS-DevTools/npm-publish@v3
