@@ -6,7 +6,10 @@ class Request {
   public readonly headers: Record<string, string> = {};
   public readonly url = new URL(`${Request.DEFAULT_PROTOCOL}//${Request.DEFAULT_HOST}`);
 
+  public isInterceptionAllowed = true;
   public body: BodyInit | null = null;
+
+  private signal: AbortSignal | null = null;
 
   constructor(path: string, method: string) {
     this.url.pathname = path;
@@ -69,6 +72,18 @@ class Request {
     return this;
   };
 
+  public setInterceptionAllowed = (allowed: boolean) => {
+    this.isInterceptionAllowed = allowed;
+
+    return this;
+  }
+
+  public setAbortController = (abortController: AbortController) => {
+    this.signal = abortController.signal;
+
+    return this;
+  }
+
   public setSearchParam = (key: string, value: string | number | boolean | Array<string | number | boolean>) => {
     if (Array.isArray(value)) {
       value.forEach((item) => {
@@ -82,6 +97,24 @@ class Request {
 
     return this;
   };
+
+  public setSearchParams = (params: Record<string, string | number | boolean | Array<string | number | boolean>>) => {
+    Object.keys(params).forEach(key => {
+      const value = params[key];
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          this.url.searchParams.append(key, item.toString());
+        });
+
+        return;
+      }
+
+      this.url.searchParams.append(key, value.toString());
+    });
+
+    return this;
+  }
 }
 
 export { Request };

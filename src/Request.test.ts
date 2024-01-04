@@ -39,6 +39,18 @@ describe("Request", () => {
     expect(Object.keys(request.headers).length).toBe(0);
   });
 
+  it("should set interception allowed", () => {
+    request.setInterceptionAllowed(false);
+    expect(request.isInterceptionAllowed).toBe(false);
+  });
+
+  it("should set an abort controller", () => {
+    const controller = new AbortController();
+    request.setAbortController(controller);
+    // @ts-expect-error - private property
+    expect(request.signal).toBe(controller.signal);
+  });
+
   it("should set multiple headers", () => {
     request.setHeaders({
       "content-type": "application/json",
@@ -52,7 +64,7 @@ describe("Request", () => {
     expect(request.headers).toEqual({ "content-type": "application/json" });
     request.setHeader("Content-Type", "multipart/form-data");
     expect(request.headers).toEqual({ "content-type": "multipart/form-data" });
-  })
+  });
 
   it("should set default headers and do not override previous", () => {
     request.setHeaders({
@@ -86,5 +98,16 @@ describe("Request", () => {
   it("should set a search param", () => {
     request.setSearchParam("id", 1);
     expect(request.url.searchParams.get("id")).toBe("1");
+  });
+
+  it("should set multiple search params", () => {
+    request.setSearchParams({
+      id: 1,
+      name: "test",
+      items: [1, 2, 3]
+    });
+    expect(request.url.searchParams.get("id")).toBe("1");
+    expect(request.url.searchParams.get("name")).toBe("test");
+    expect(request.url.searchParams.getAll("items")).toStrictEqual(["1", "2", "3"]);
   });
 });

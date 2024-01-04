@@ -3,17 +3,21 @@ export class Request {
   readonly url: URL;
   readonly method: string;
   readonly headers: Record<string, string>;
+
+  isInterceptionAllowed: boolean;
   body: BodyInit | null;
 
   constructor(path: string, method: string);
 
   setHeader(key: string, value: string): Request;
   setHeaders(headers: Record<string, string>): Request;
-  setDefaultHeaders(headers: Record<string, string>): Request;
   removeHeader(key: string): Request;
   setBody(data: BodyInit): Request;
+  setInterceptionAllowed(allowed: boolean): Request;
+  setAbortController(abortController: AbortController): Request;
   setUrlParam(key: string, value: string | number): Request;
   setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>): Request;
+  setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>): Request;
 }
 
 export class Client<Response> {
@@ -34,5 +38,5 @@ export interface Transport<Response> {
 }
 
 export interface Interceptor<Response> {
-  onResponse(response: Response): Promise<Response>;
+  onResponse(request: Request, response: Response, resolve: (value: Response) => void, reject: (reason?: any) => void): Promise<void>;
 }

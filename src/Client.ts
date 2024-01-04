@@ -31,23 +31,26 @@ class Client<Response> {
     return this;
   }
 
-  public async perform(request: Request) {
-    if (!this.transport) {
-      throw new Error("Transport is not defined");
-    }
-
+  public perform(request: Request) {
     request.setBaseURL(this.url);
     request.setDefaultHeaders(this.defaultHeaders);
 
-    const promise = await this.transport.handle(request);
+    return new Promise<Response>(async (resolve, reject) => {
+      if (!this.transport) {
+        reject("Transport is not defined");
+        return;
+      }
 
-    await Promise.allSettled(
-      this.interceptors.map((interceptor) =>
-        interceptor.onResponse(promise)
-      )
-    );
+      const response = await this.transport.handle(request);
 
-    return promise;
+      if (request.isInterceptionAllowed) {
+        await Promise.allSettled(this.interceptors.map((interceptor) =>
+          interceptor.onResponse(request, response, resolve, reject)
+        ));
+      }
+
+      resolve(response);
+    });
   };
 }
 
@@ -56,7 +59,7 @@ interface Transport<Response> {
 }
 
 interface Interceptor<Response> {
-  onResponse(response: Response): Promise<Response>;
+  onResponse(request: Request, response: Response, resolve: (value: Response) => void, reject: (reason?: any) => void): Promise<void>;
 }
 
 export type { Interceptor, Transport };

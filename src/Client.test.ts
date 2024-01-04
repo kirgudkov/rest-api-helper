@@ -62,7 +62,8 @@ describe("Client", () => {
 
     const request = {
       setBaseURL: jest.fn(),
-      setDefaultHeaders: jest.fn()
+      setDefaultHeaders: jest.fn(),
+      isInterceptionAllowed: true
     };
 
     await client.perform(request as any);
@@ -70,6 +71,42 @@ describe("Client", () => {
     expect(transport.handle).toHaveBeenCalledWith(request);
     expect(request.setBaseURL).toHaveBeenCalledWith("http://localhost:3000");
     expect(request.setDefaultHeaders).toHaveBeenCalledWith({});
-    expect(interceptor.onResponse).toHaveBeenCalledWith(response);
+    expect(interceptor.onResponse).toHaveBeenCalledWith(request, response, expect.any(Function), expect.any(Function));
+  });
+
+  it("should properly intercept a request", async () => {
+    const client = new Client("http://localhost:3000");
+
+    const transport = {
+      handle: jest.fn().mockImplementation(() => {
+        return Promise.resolve({ status: 401 });
+      })
+    };
+
+    client.setTransport(transport);
+
+    const interceptor = {
+      onResponse: jest.fn().mockImplementation((_, response, resolve, reject) => {
+        if (response.status === 401) {
+          resolve({ status: 200 });
+        }
+
+        reject();
+      })
+    };
+
+    client.setInterceptor(interceptor);
+
+    const request = {
+      setBaseURL: jest.fn(),
+      setDefaultHeaders: jest.fn(),
+      isInterceptionAllowed: true
+    };
+
+    const response = await client.perform(request as any);
+
+    expect(transport.handle).toHaveBeenCalledWith(request);
+    expect(interceptor.onResponse).toHaveBeenCalledWith(request, { status: 401 }, expect.any(Function), expect.any(Function));
+    expect(response).toEqual({ status: 200 });
   });
 });
