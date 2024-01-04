@@ -19,8 +19,9 @@ jobs:
           commit_message=$(git log -1 --pretty=%B)
           echo "Commit message: $commit_message"
           echo "TRIGGER_NEXT=false" >> $GITHUB_ENV
-          if [[ "$commit_message" == *"publish"* ]]; then
+          if [[ "$commit_message" == *"specific-string"* ]]; then
             echo "TRIGGER_NEXT=true" >> $GITHUB_ENV
+          fi
       - name: Set output
         id: set_output
         run: echo "::set-output name=trigger_next::$TRIGGER_NEXT"
