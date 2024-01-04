@@ -22,7 +22,8 @@ describe("URLSearchParams", () => {
     params.append("foo", "bar");
     params.append("foo", "baz");
 
-    expect(params.toString()).toBe("foo[]=bar&foo[]=baz");
+    const encodedBrackets = encodeURIComponent("[]");
+    expect(params.toString()).toBe(`foo${encodedBrackets}=bar&foo${encodedBrackets}=baz`);
   });
 
   it("should append multiple parameters with []", () => {
@@ -32,7 +33,8 @@ describe("URLSearchParams", () => {
     params.append("foo", "b");
     params.append("foo", "c");
 
-    expect(params.toString()).toBe("a=a&foo[]=b&foo[]=c");
+    const encodedBrackets = encodeURIComponent("[]");
+    expect(params.toString()).toBe(`a=a&foo${encodedBrackets}=b&foo${encodedBrackets}=c`);
   });
 
   it("should get a parameter", () => {

@@ -13,30 +13,31 @@ export class URLSearchParams {
     }
   }
 
-  get(key: string): string | undefined {
-    const values = this.params.get(key);
-    return values ? values[0] : undefined;
+  get(key: string) {
+    return this.params.get(key)?.[0];
   }
 
-  getAll(key: string): string[] {
+  getAll(key: string) {
     return this.params.get(key) || [];
   }
 
-  toString(): string {
-    let paramString = "";
+  toString() {
+    let result = "";
+
     this.params.forEach((values, key) => {
       if (values.length > 1) {
         values.forEach(value => {
-          paramString += `${paramString ? "&" : ""}${encodeURIComponent(key)}[]=${encodeURIComponent(value)}`;
+          result += `${result ? "&" : ""}${encodeURIComponent(`${key}[]`)}=${encodeURIComponent(value)}`;
         });
 
         return;
       }
 
       values.forEach(value => {
-        paramString += `${paramString ? "&" : ""}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+        result += `${result ? "&" : ""}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
       });
     });
-    return paramString;
+
+    return result;
   }
 }

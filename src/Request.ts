@@ -18,7 +18,7 @@ class Request {
     this.method = method;
   }
 
-  public setBaseURL = (url: string) => {
+  setBaseURL(url: string) {
     const [protocol, host] = url.split("://");
 
     this.url.protocol = protocol;
@@ -27,13 +27,13 @@ class Request {
     return this;
   };
 
-  public setHeader = (key: string, value: string) => {
+  setHeader(key: string, value: string) {
     this.headers[key.toLowerCase()] = value;
 
     return this;
   };
 
-  public removeHeader = (key: string) => {
+  removeHeader(key: string) {
     if (this.headers[key.toLowerCase()]) {
       delete this.headers[key.toLowerCase()];
     }
@@ -41,7 +41,7 @@ class Request {
     return this;
   };
 
-  public setDefaultHeaders = (headers: Record<string, string>) => {
+  setDefaultHeaders(headers: Record<string, string>) {
     Object.keys(headers).forEach(item => {
       const key = item.toLowerCase();
 
@@ -53,7 +53,7 @@ class Request {
     return this;
   };
 
-  public setHeaders = (headers: Record<string, string>) => {
+  setHeaders(headers: Record<string, string>) {
     Object.keys(headers).forEach(item => {
       const key = item.toLowerCase();
       this.headers[key] = headers[key];
@@ -62,31 +62,31 @@ class Request {
     return this;
   };
 
-  public setBody(data: BodyInit): Request {
+  setBody(data: BodyInit): Request {
     this.body = data;
 
     return this;
   }
 
-  public setUrlParam = (key: string, value: string | number) => {
+  setUrlParam(key: string, value: string | number) {
     this.url.pathname = this.url.pathname.replace(`:${key}`, value.toString());
 
     return this;
   };
 
-  public setInterceptionAllowed = (allowed: boolean) => {
+  setInterceptionAllowed(allowed: boolean) {
     this.isInterceptionAllowed = allowed;
 
     return this;
   }
 
-  public setAbortController = (abortController: AbortController) => {
+  setAbortController(abortController: AbortController) {
     this.signal = abortController.signal;
 
     return this;
   }
 
-  public setSearchParam = (key: string, value: string | number | boolean | Array<string | number | boolean>) => {
+  setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>) {
     if (Array.isArray(value)) {
       value.forEach((item) => {
         this.url.searchParams.append(key, item.toString());
@@ -100,7 +100,7 @@ class Request {
     return this;
   };
 
-  public setSearchParams = (params: Record<string, string | number | boolean | Array<string | number | boolean>>) => {
+  setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>) {
     Object.keys(params).forEach(key => {
       const value = params[key];
 

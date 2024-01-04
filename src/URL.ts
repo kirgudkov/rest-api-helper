@@ -21,12 +21,12 @@ export class URL {
     }
   }
 
-  get href(): string {
+  get href() {
     const query = this.searchParams.toString();
     return `${this.protocol}://${this.host}${this.pathname}${query ? `?${query}` : ""}`;
   }
 
-  toString(): string {
+  toString() {
     return this.href;
   }
 }
