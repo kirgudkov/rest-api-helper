@@ -1,3 +1,5 @@
+import { URL } from "url";
+
 class Request {
   public static readonly DEFAULT_PROTOCOL = "http:";
   public static readonly DEFAULT_HOST = "host.com";
