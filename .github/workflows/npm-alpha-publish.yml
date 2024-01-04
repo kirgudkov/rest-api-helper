@@ -1,0 +1,45 @@
+name: npm-publish
+
+on:
+  push:
+    branches:
+      - '*-alpha.*'
+
+jobs:
+  check_commit_message:
+    runs-on: ubuntu-latest
+    outputs:
+      trigger_next: ${{ steps.commit-message-check.outputs.trigger_next }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check commit message
+        id: commit-message-check
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          echo "Commit message: $commit_message"
+          if [[ "$commit_message" == *"publish"* ]]; then
+            echo "::set-output name=trigger_next::true"
+          else
+            echo "::set-output name=trigger_next::false"
+          fi
+
+  npm-publish:
+    needs: check_commit_message
+    if: needs.check_commit_message.outputs.trigger_next == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: npm install
+        run: npm install
+
+      - name: test
+        run: npm test
+
+      - name: publish
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_PUBLISH_SECRET }}
+          tag: alpha

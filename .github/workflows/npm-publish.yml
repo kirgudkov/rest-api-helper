@@ -10,20 +10,17 @@ jobs:
     name: npm-publish
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: checkout
+        uses: actions/checkout@v4
 
-      - name: Version Bump
-        uses: phips28/gh-action-bump-version@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          commit-message: 'CI: bumps version to {{version}}'
-          minor-wording: 'minor'
-          major-wording: 'major'
-          patch-wording: 'patch,fixes,fix,feat,feature,fixed'
+      - name: npm install
+        run: npm install
 
-      - name: Publish to npm
-        uses: JS-DevTools/npm-publish@v1
+      - name: test
+        run: npm test
+
+      - name: publish
+        uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_PUBLISH_SECRET }}
+          tag: latest
