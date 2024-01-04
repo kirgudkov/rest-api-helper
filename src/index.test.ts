@@ -18,10 +18,10 @@ const transport: Transport<Response> = {
 };
 
 const interceptor: Interceptor<Response> = {
-  onResponse: jest.fn().mockImplementation(async (response) => {
+  onResponse: jest.fn().mockImplementation(async (_, response, resolve) => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    return response;
+    resolve(response);
   })
 };
 

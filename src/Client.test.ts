@@ -55,7 +55,9 @@ describe("Client", () => {
     client.setTransport(transport);
 
     const interceptor = {
-      onResponse: jest.fn()
+      onResponse: jest.fn().mockImplementation((_, response, resolve) => {
+        resolve(response);
+      })
     };
 
     client.setInterceptor(interceptor);

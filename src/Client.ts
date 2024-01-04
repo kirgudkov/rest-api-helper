@@ -41,15 +41,21 @@ class Client<Response> {
         return;
       }
 
-      const response = await this.transport.handle(request);
+      try {
+        const response = await this.transport.handle(request);
 
-      if (request.isInterceptionAllowed) {
+        if (!request.isInterceptionAllowed) {
+          resolve(response);
+          return;
+        }
+
         await Promise.allSettled(this.interceptors.map((interceptor) =>
           interceptor.onResponse(request, response, resolve, reject)
         ));
       }
-
-      resolve(response);
+      catch (error) {
+        reject(error);
+      }
     });
   };
 }
