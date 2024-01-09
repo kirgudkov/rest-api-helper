@@ -1,4 +1,4 @@
-import { Request } from "./Request";
+import { Request, Get, Head, Delete, Put, Patch, Post } from "./Request";
 
 const path = "/test/:id";
 const method = "get";
@@ -114,5 +114,46 @@ describe("Request", () => {
     expect(request.url.searchParams.get("id")).toBe("1");
     expect(request.url.searchParams.get("name")).toBe("test");
     expect(request.url.searchParams.getAll("items")).toStrictEqual(["1", "2", "3"]);
+  });
+
+  it("should lowercase method", () => {
+    request = new Request(path, "GET");
+    expect(request.method).toBe("get");
+  });
+
+  it("should create Get request", () => {
+    const get = new Get(path);
+    expect(get.method).toBe("get");
+    expect(get.url.pathname).toBe(path);
+  });
+
+  it("should create Delete request", () => {
+    const del = new Delete(path);
+    expect(del.method).toBe("delete");
+    expect(del.url.pathname).toBe(path);
+  });
+
+  it("should create Head request", () => {
+    const head = new Head(path);
+    expect(head.method).toBe("head");
+    expect(head.url.pathname).toBe(path);
+  });
+
+  it("should create Put request", () => {
+    const put = new Put(path);
+    expect(put.method).toBe("put");
+    expect(put.url.pathname).toBe(path);
+  });
+
+  it("should create Patch request", () => {
+    const patch = new Patch(path);
+    expect(patch.method).toBe("patch");
+    expect(patch.url.pathname).toBe(path);
+  });
+
+  it("should create Post request", () => {
+    const post = new Post(path);
+    expect(post.method).toBe("post");
+    expect(post.url.pathname).toBe(path);
   });
 });

@@ -15,7 +15,7 @@ class Request {
 
   constructor(path: string, method: string) {
     this.url.pathname = path;
-    this.method = method;
+    this.method = method.toLowerCase();
   }
 
   setBaseURL(url: string) {
@@ -119,4 +119,40 @@ class Request {
   }
 }
 
-export { Request };
+class Get extends Request {
+  constructor(path: string) {
+    super(path, "get");
+  }
+}
+
+class Post extends Request {
+  constructor(path: string) {
+    super(path, "post");
+  }
+}
+
+class Put extends Request {
+  constructor(path: string) {
+    super(path, "put");
+  }
+}
+
+class Delete extends Request {
+  constructor(path: string) {
+    super(path, "delete");
+  }
+}
+
+class Patch extends Request {
+  constructor(path: string) {
+    super(path, "patch");
+  }
+}
+
+class Head extends Request {
+  constructor(path: string) {
+    super(path, "head");
+  }
+}
+
+export { Request, Get, Post, Put, Delete, Patch, Head };
