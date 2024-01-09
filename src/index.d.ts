@@ -20,12 +20,29 @@ export class Request {
   setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>): Request;
 }
 
-export class Get extends Request {}
-export class Post extends Request {}
-export class Put extends Request {}
-export class Delete extends Request {}
-export class Patch extends Request {}
-export class Head extends Request {}
+export class Get extends Request {
+  constructor(path: string);
+}
+
+export class Post extends Request {
+  constructor(path: string);
+}
+
+export class Put extends Request {
+  constructor(path: string);
+}
+
+export class Delete extends Request {
+  constructor(path: string);
+}
+
+export class Patch extends Request {
+  constructor(path: string);
+}
+
+export class Head extends Request {
+  constructor(path: string);
+}
 
 export class Client<Response> {
 
