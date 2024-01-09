@@ -1,2 +1,2 @@
 export { Client, Interceptor, Transport } from "./Client";
-export { Request } from "./Request";
+export { Request, Get, Post, Put, Delete, Patch, Head } from "./Request";
