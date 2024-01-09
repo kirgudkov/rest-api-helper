@@ -68,6 +68,12 @@ class Request {
     return this;
   }
 
+  setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]): Request {
+    this.body = JSON.stringify(data);
+
+    return this;
+  }
+
   setUrlParam(key: string, value: string | number) {
     this.url.pathname = this.url.pathname.replace(`:${key}`, value.toString());
 

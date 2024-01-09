@@ -13,6 +13,7 @@ export class Request {
   setHeaders(headers: Record<string, string>): Request;
   removeHeader(key: string): Request;
   setBody(data: BodyInit): Request;
+  setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]): Request;
   setInterceptionAllowed(allowed: boolean): Request;
   setAbortController(abortController: AbortController): Request;
   setUrlParam(key: string, value: string | number): Request;
