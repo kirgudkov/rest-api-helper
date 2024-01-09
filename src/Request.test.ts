@@ -95,9 +95,14 @@ describe("Request", () => {
     expect(request.body).toBe(JSON.stringify({ test: "test" }));
   });
 
-  it("should set the body as JSON", () => {
+  it("should set the object body as JSON", () => {
     request.setBodyJSON({ test: "test" });
     expect(request.body).toBe(JSON.stringify({ test: "test" }));
+  });
+
+  it("should set the array body as JSON", () => {
+    request.setBodyJSON([{ test: "test" }]);
+    expect(request.body).toBe(JSON.stringify([{ test: "test" }]));
   });
 
   it("should set a url param", () => {
