@@ -62,13 +62,13 @@ class Request {
     return this;
   };
 
-  setBody(data: BodyInit): Request {
+  setBody(data: BodyInit) {
     this.body = data;
 
     return this;
   }
 
-  setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]): Request {
+  setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]) {
     this.body = JSON.stringify(data);
 
     return this;
