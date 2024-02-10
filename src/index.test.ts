@@ -27,31 +27,31 @@ const interceptor: Interceptor<Response> = {
 
 const baseURL = "https://example.com";
 
+const defaultHeaders = {
+  "content-type": "application/json",
+  "accept": "application/json"
+};
+
 const client = new Client<Response>("https://example.com")
-  .setDefaultHeaders({
-    "content-type": "application/json",
-    "accept": "application/json"
-  })
+  .setDefaultHeaders(defaultHeaders)
   .setTransport(transport)
   .setInterceptor(interceptor);
 
-const request = new Request("/latest", "get")
+const request = new Request("/latest/:id", "get")
   .setSearchParam("amount", 10)
   .setSearchParam("from", "GBP")
-  .setSearchParam("to", "USD");
+  .setSearchParam("to", "USD")
+  .setUrlParam("id", 2);
 
 describe("index", () => {
   it("should create a client", () => {
     expect(client).toBeDefined();
     expect(client.url).toBe(baseURL);
-    expect(client.defaultHeaders).toEqual({
-      "content-type": "application/json",
-      "accept": "application/json"
-    });
+    expect(client.defaultHeaders).toEqual(defaultHeaders);
   });
 
   it("should create a request", async () => {
-    expect(request.url.pathname).toBe("/latest");
+    expect(request.url.pathname).toBe("/latest/2");
     expect(request.url.searchParams.get("amount")).toBe("10");
     expect(request.url.searchParams.get("from")).toBe("GBP");
     expect(request.url.searchParams.get("to")).toBe("USD");

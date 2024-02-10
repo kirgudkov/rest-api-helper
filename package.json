@@ -1,6 +1,6 @@
 {
   "name": "rest-api-helper",
-  "version": "2.0.0-alpha.13",
+  "version": "2.0.0-alpha.14",
   "description": "Just a little sweet sugar to deal with http requests",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "29.5.11",
-    "@types/url-parse": "^1.4.11",
     "jest": "29.7.0",
     "ts-jest": "29.1.1",
     "typescript": "5.3.3"

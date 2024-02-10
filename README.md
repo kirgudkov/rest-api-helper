@@ -1,6 +1,8 @@
 ## Installation
 
-    npm install rest-api-helper
+```
+npm install rest-api-helper
+```
 
 ## Usage
 
@@ -14,20 +16,20 @@ const transport: Transport<Response> = {
     }
 };
 
-// If you want to intercept response, implement Interceptor interface
+// If you want to intercept responses, implement Interceptor interface
 // All responses will be passed through interceptor before they are returned
 const interceptor: Interceptor<Response> = {
     onResponse: async (response) => {
         if (response.status === 401) {
-          // Do things
+          // Do things: refresh token, reattempt request and return result
         }
-    
+
         return response;
     }
 };
 
 // Create client. Client holds base url, default headers and interceptors
-// And it performs requests using transport
+// And it performs requests using transport impdemented above
 const client = new Client<Response>("https://api.frankfurter.app")
     .setDefaultHeaders({
         "content-type": "application/json",

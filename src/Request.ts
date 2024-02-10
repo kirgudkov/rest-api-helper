@@ -27,6 +27,15 @@ class Request {
     return this;
   };
 
+  setHeaders(headers: Record<string, string>) {
+    Object.keys(headers).forEach(rawKey => {
+      const formattedKey = rawKey.toLowerCase();
+      this.headers[formattedKey] = headers[rawKey];
+    });
+
+    return this;
+  };
+
   setHeader(key: string, value: string) {
     this.headers[key.toLowerCase()] = value;
 
@@ -53,15 +62,6 @@ class Request {
     return this;
   };
 
-  setHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(rawKey => {
-      const formattedKey = rawKey.toLowerCase();
-      this.headers[formattedKey] = headers[rawKey];
-    });
-
-    return this;
-  };
-
   setBody(data: BodyInit) {
     this.body = data;
 
@@ -69,7 +69,12 @@ class Request {
   }
 
   setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]) {
-    this.body = JSON.stringify(data);
+    try {
+      this.body = JSON.stringify(data);
+    }
+    catch (error) {
+      throw new Error("Request: failed to stringify the body");
+    }
 
     return this;
   }
