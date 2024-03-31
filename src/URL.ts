@@ -8,7 +8,10 @@ export class URL {
 
   private _pathname: string = "";
 
-  constructor(url: string) {
+  constructor(url?: string) {
+    if (!url) {
+      return;
+    }
 
     const regex = /^(\w+):\/\/([^\/]+)(\/.*)?/;
     const match = url.match(regex);
@@ -41,8 +44,7 @@ export class URL {
   }
 
   get href() {
-    const query = this.searchParams.toString();
-    return `${this.protocol}://${this.host}${this.pathname}${query ? `?${query}` : ""}`;
+    return `${this.protocol}://${this.host}${this.pathname}${this.searchParams.toString()}`;
   }
 
   toString() {

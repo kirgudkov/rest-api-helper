@@ -1,9 +1,5 @@
 export class URLSearchParams {
-  private params: Map<string, string[]>;
-
-  constructor() {
-    this.params = new Map();
-  }
+  private params: Map<string, string[]> = new Map();
 
   append(key: string, value: string) {
     if (this.params.has(key)) {
@@ -18,26 +14,20 @@ export class URLSearchParams {
   }
 
   getAll(key: string) {
-    return this.params.get(key) || [];
+    return this.params.get(key) ?? [];
   }
 
   toString() {
     let result = "";
 
     this.params.forEach((values, key) => {
-      if (values.length > 1) {
-        values.forEach(value => {
-          result += `${result ? "&" : ""}${encodeURIComponent(`${key}[]`)}=${encodeURIComponent(value)}`;
-        });
-
-        return;
-      }
+      const name = values.length > 1 ? `${key}[]` : key;
 
       values.forEach(value => {
-        result += `${result ? "&" : ""}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+        result += `${result ? "&" : ""}${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
       });
     });
 
-    return result;
+    return result ? `?${result}` : "";
   }
 }

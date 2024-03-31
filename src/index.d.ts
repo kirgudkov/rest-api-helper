@@ -3,9 +3,8 @@ export class Request {
   readonly url: URL;
   readonly method: string;
   readonly headers: Record<string, string>;
-
-  isInterceptionAllowed: boolean;
-  body: BodyInit | null;
+  readonly body: BodyInit | null;
+  readonly isInterceptionAllowed: boolean;
 
   /**
    * Creates a new request with a path and a method (GET, POST, PUT, DELETE etc).
@@ -66,7 +65,7 @@ export class Request {
   setAbortController(abortController: AbortController): Request;
 
   /**
-   * Set a URL parameter. It will replace the occurrence of `:${key}` in the URL.
+   * Set a URL parameter. It will replace the occurrence of :key in the URL.
    * @param key
    * @param value
    */
@@ -75,7 +74,7 @@ export class Request {
   /**
    * Set a query parameter. It will append the key-value pair to the URL.
    * e.g. setSearchParam("name", "John") -> /users?name=John
-   * or setSearchParam("names", ["John", "Doe"]) -> /users?names[]=John&names[]=Doe
+   * or setSearchParam("names", ["John", "Alice"]) -> /users?names[]=John&names[]=Alice
    * @param key
    * @param value
    */
@@ -84,7 +83,7 @@ export class Request {
   /**
    * Set multiple query parameters. It will append the key-value pairs to the URL.
    * e.g. setSearchParams({ name: "John", age: 30 }) -> /users?name=John&age=30
-   * or setSearchParams({ names: ["John", "Doe"] }) -> /users?names[]=John&names[]=Doe
+   * or setSearchParams({ names: ["John", "Alice"] }) -> /users?names[]=John&names[]=Alice
    * @param params
    */
   setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>): Request;
@@ -114,23 +113,48 @@ export class Head extends Request {
   constructor(path: string);
 }
 
+
+
+/**
+ * The glue substance for everything. Holds base URL, some default headers that will be passed to each Request,
+ * transport and interceptors.
+ */
 export class Client<Response> {
 
-  url: string;
+  baseURL: string;
   defaultHeaders: Record<string, string>;
 
-  constructor(url: string, transport?: Transport<Response>);
+  constructor(baseURL: string, transport?: Transport<Response>);
 
   setTransport(transport: Transport<Response>): Client<Response>;
-  setDefaultHeaders(headers: Record<string, string>): Client<Response>;
   setInterceptor(interceptor: Interceptor<Response>): Client<Response>;
+  setDefaultHeaders(headers: Record<string, string>): Client<Response>;
+
   perform(request: Request): Promise<Response>;
 }
 
+
+
+/**
+ * Defines one single method that will be called by Client to perform network request.
+ * In here we have to implement the way we want to execute and handle every call whether it is fetch, or XHR or test mock etc.
+ */
 export interface Transport<Response> {
   handle(request: Request): Promise<Response>;
 }
 
+
+
+/**
+ * The Interceptor interface binds you to implement `onResponse` method.
+ * Instead of being resolved immediately, original promise will fall through this interceptor pipeline.
+ * Inside onResponse implementation we can do whatever we want: check request/response, make additional requests (refresh tokens etc.)
+ * resolve or reject original Promise
+ */
 export interface Interceptor<Response> {
-  onResponse(request: Request, response: Response, resolve: (value: Response) => void, reject: (reason?: any) => void): Promise<void>;
+  onResponse(request: Request, response: Response, promise: OriginalPromise<Response>): Promise<void>;
 }
+
+type OriginalPromise<T> = {
+  resolve: (value: T) => void, reject: (reason?: unknown) => void
+};

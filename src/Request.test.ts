@@ -11,8 +11,8 @@ describe("Request", () => {
   });
 
   it("should create a Request with default url", () => {
-    expect(request.url.protocol).toBe(Request.DEFAULT_PROTOCOL);
-    expect(request.url.host).toBe(Request.DEFAULT_HOST);
+    expect(request.url.protocol).toBe("");
+    expect(request.url.host).toBe("");
     expect(request.url.pathname).toBe(path);
   });
 
@@ -42,13 +42,6 @@ describe("Request", () => {
   it("should set interception allowed", () => {
     request.setInterceptionAllowed(false);
     expect(request.isInterceptionAllowed).toBe(false);
-  });
-
-  it("should set an abort controller", () => {
-    const controller = new AbortController();
-    request.setAbortController(controller);
-    // @ts-expect-error - private property
-    expect(request.signal).toBe(controller.signal);
   });
 
   it("should set multiple headers", () => {

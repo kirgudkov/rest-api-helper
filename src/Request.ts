@@ -1,17 +1,22 @@
 import { URL } from "./URL";
 
 class Request {
-  public static readonly DEFAULT_PROTOCOL = "http";
-  public static readonly DEFAULT_HOST = "host.com";
 
-  public readonly method: string;
-  public readonly headers: Record<string, string> = {};
-  public readonly url = new URL(`${Request.DEFAULT_PROTOCOL}://${Request.DEFAULT_HOST}`);
+  readonly method: string;
+  readonly headers: Record<string, string> = {};
+  readonly url = new URL();
 
-  public isInterceptionAllowed = true;
-  public body: BodyInit | null = null;
+  #isInterceptionAllowed = true;
+  get isInterceptionAllowed() {
+    return this.#isInterceptionAllowed;
+  }
 
-  private signal: AbortSignal | null = null;
+  #body: BodyInit | null = null;
+  get body() {
+    return this.#body;
+  }
+
+  #signal: AbortSignal | null = null;
 
   constructor(path: string, method: string) {
     this.url.pathname = path;
@@ -63,14 +68,14 @@ class Request {
   };
 
   setBody(data: BodyInit) {
-    this.body = data;
+    this.#body = data;
 
     return this;
   }
 
   setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]) {
     try {
-      this.body = JSON.stringify(data);
+      this.#body = JSON.stringify(data);
     }
     catch (error) {
       throw new Error("Request: failed to stringify the body");
@@ -86,13 +91,13 @@ class Request {
   };
 
   setInterceptionAllowed(allowed: boolean) {
-    this.isInterceptionAllowed = allowed;
+    this.#isInterceptionAllowed = allowed;
 
     return this;
   }
 
   setAbortController(abortController: AbortController) {
-    this.signal = abortController.signal;
+    this.#signal = abortController.signal;
 
     return this;
   }

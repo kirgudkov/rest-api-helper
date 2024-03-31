@@ -13,6 +13,18 @@ describe("URL", () => {
     expect(url.toString()).toBe("http://localhost:3000");
   });
 
+  it("should create an URL", () => {
+    const url = new URL();
+
+    expect(url).toBeDefined();
+    expect(url.protocol).toBe("");
+    expect(url.host).toBe("");
+    expect(url.pathname).toBe("");
+    expect(url.searchParams).toBeDefined();
+    expect(url.href).toBe("://");
+    expect(url.toString()).toBe("://");
+  });
+
   it("should create an URL with pathname", () => {
     const url = new URL("http://localhost:3000/pathname");
 

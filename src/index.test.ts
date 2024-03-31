@@ -18,10 +18,10 @@ const transport: Transport<Response> = {
 };
 
 const interceptor: Interceptor<Response> = {
-  onResponse: jest.fn().mockImplementation(async (_, response, resolve) => {
+  onResponse: jest.fn().mockImplementation(async (_, response, promise) => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    resolve(response);
+    promise.resolve(response);
   })
 };
 
@@ -46,7 +46,7 @@ const request = new Request("/latest/:id", "get")
 describe("index", () => {
   it("should create a client", () => {
     expect(client).toBeDefined();
-    expect(client.url).toBe(baseURL);
+    expect(client.baseURL).toBe(baseURL);
     expect(client.defaultHeaders).toEqual(defaultHeaders);
   });
 

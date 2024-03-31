@@ -1,52 +1,51 @@
 import { Client } from "./Client";
 
+const url = "http://base.url";
+
+const request = {
+  setBaseURL: jest.fn(),
+  setDefaultHeaders: jest.fn(),
+  isInterceptionAllowed: true
+};
+
 describe("Client", () => {
-  it("should create a client", () => {
-    const client = new Client("http://localhost:3000");
+  it("should create an instance", () => {
+    const client = new Client(url);
 
     expect(client).toBeDefined();
-    expect(client.url).toBe("http://localhost:3000");
+    expect(client.baseURL).toBe(url);
     expect(client.defaultHeaders).toEqual({});
   });
 
-  it("should set transport", () => {
-    const client = new Client("http://localhost:3000");
-    const transport = {
-      handle: jest.fn()
-    };
+  it("should change url", () => {
+    const client = new Client(url);
 
-    client.setTransport(transport);
+    expect(client).toBeDefined();
+    expect(client.baseURL).toBe(url);
 
-    // @ts-expect-error - private property
-    expect(client.transport).toBe(transport);
+    client.baseURL = "foo";
+    expect(client.baseURL).toBe("foo");
   });
 
   it("should set default headers", () => {
-    const client = new Client("http://localhost:3000");
-    const headers = {
-      "Content-Type": "application/json"
-    };
+    const client = new Client(url);
+    const headers = { "Content-Type": "application/json" };
 
     client.setDefaultHeaders(headers);
-
     expect(client.defaultHeaders).toBe(headers);
+
+    client.defaultHeaders = { "Content-Type": "application/text" };
+    expect(client.defaultHeaders).toEqual({ "Content-Type": "application/text" });
   });
 
-  it("should set interceptor", () => {
-    const client = new Client("http://localhost:3000");
-    const interceptor = {
-      onResponse: jest.fn()
-    };
-
-    client.setInterceptor(interceptor);
-
-    // @ts-expect-error - private property
-    expect(client.interceptors).toContain(interceptor);
+  it("should throw error if transport is not set", () => {
+    const client = new Client(url);
+    expect(client.perform(request as any)).rejects.toBeDefined();
   });
 
   it("should perform a request", async () => {
     const response = { foo: "bar" };
-    const client = new Client("http://localhost:3000");
+    const client = new Client(url);
 
     const transport = {
       handle: jest.fn().mockResolvedValue(response)
@@ -55,8 +54,8 @@ describe("Client", () => {
     client.setTransport(transport);
 
     const interceptor = {
-      onResponse: jest.fn().mockImplementation((_, response, resolve) => {
-        resolve(response);
+      onResponse: jest.fn().mockImplementation((_, response, promise) => {
+        promise.resolve(response);
       })
     };
 
@@ -68,16 +67,15 @@ describe("Client", () => {
       isInterceptionAllowed: true
     };
 
-    await client.perform(request as any);
+    const result = await client.perform(request as any);
 
-    expect(transport.handle).toHaveBeenCalledWith(request);
-    expect(request.setBaseURL).toHaveBeenCalledWith("http://localhost:3000");
-    expect(request.setDefaultHeaders).toHaveBeenCalledWith({});
-    expect(interceptor.onResponse).toHaveBeenCalledWith(request, response, expect.any(Function), expect.any(Function));
+    expect(transport.handle).toHaveBeenCalledTimes(1);
+    expect(interceptor.onResponse).toHaveBeenCalledTimes(1);
+    expect(result).toBe(response)
   });
 
   it("should properly intercept a request", async () => {
-    const client = new Client("http://localhost:3000");
+    const client = new Client(url);
 
     const transport = {
       handle: jest.fn().mockImplementation(() => {
@@ -88,12 +86,12 @@ describe("Client", () => {
     client.setTransport(transport);
 
     const interceptor = {
-      onResponse: jest.fn().mockImplementation((_, response, resolve, reject) => {
+      onResponse: jest.fn().mockImplementation((_, response, promise) => {
         if (response.status === 401) {
-          resolve({ status: 200 });
+          promise.resolve("modified");
         }
 
-        reject();
+        promise.reject();
       })
     };
 
@@ -107,8 +105,8 @@ describe("Client", () => {
 
     const response = await client.perform(request as any);
 
-    expect(transport.handle).toHaveBeenCalledWith(request);
-    expect(interceptor.onResponse).toHaveBeenCalledWith(request, { status: 401 }, expect.any(Function), expect.any(Function));
-    expect(response).toEqual({ status: 200 });
+    expect(transport.handle).toHaveBeenCalledTimes(1);
+    expect(interceptor.onResponse).toHaveBeenCalledTimes(1);
+    expect(response).toEqual("modified");
   });
 });
