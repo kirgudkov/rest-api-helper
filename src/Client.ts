@@ -62,6 +62,11 @@ class Client<T> {
           return;
         }
 
+        if (!this.#interceptors.length) {
+          resolve(response);
+          return;
+        }
+
         this.#interceptors.forEach(interceptor =>
           interceptor.onResponse(request, response, { resolve, reject })
         );

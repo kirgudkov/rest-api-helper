@@ -1,6 +1,6 @@
 {
   "name": "rest-api-helper",
-  "version": "2.0.0-alpha.15",
+  "version": "2.0.0-alpha.16",
   "description": "Just a little sweet sugar to deal with http requests",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
