@@ -1,16 +1,12 @@
 {
   "name": "rest-api-helper",
-  "version": "2.0.0-alpha.17",
+  "version": "2.0.0-alpha.18",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/KirillGudkov/rest-api-helper"
   },
-  "bugs": {
-    "url": "https://github.com/KirillGudkov/rest-api-helper/issues"
-  },
-  "homepage": "https://github.com/KirillGudkov/rest-api-helper#readme",
   "scripts": {
     "test": "jest",
     "clean": "rm -rf ./lib",
