@@ -5,11 +5,13 @@ The library promotes separation of concerns and offers a structured API for crea
 
 # Installation
 
-Install the package using npm or yarn:
+Install the package using npm:
 
 ```bash
 npm install rest-api-helper
 ```
+
+or yarn:
 ```bash
 yarn add rest-api-helper
 ```
@@ -18,14 +20,14 @@ yarn add rest-api-helper
 
 To perform any request it is required to:
 
-- Define the way you're going to communicate (transport);
-- Create and configure client object to glue everything together (base url, default headers, transport etc);
-- Create request object;
-- Perform the request using client;
+- Define _transport_ aka the way you're going to communicate
+- Configure _client_ to glue everything together (base url, headers, transport etc)
+- Create _request_ object
+
 
 ---
 
-### Transport implementation.
+### Transport implementation
 
 The `Transport` interface obliges you to implement one single method `handle`. It can do whatever you want whether it's `fetch` or `XHR` or `setTimeout` mock. In most cases, you're going to use the fetch API:
 
@@ -34,22 +36,22 @@ import { Transport } from "rest-api-helper";
 
 const transport: Transport<Response> = {
   handle(request) {
-    return fetch(request.url, request);
+    return fetch(request.url.href, request);
   }
 };
 ```
 
 ---
 
-### Interceptor implementation (Optional).
+### Interceptor implementation (Optional)
 
 The `Interceptor` interface binds you to implement `onResponse` method. Instead of being resolved immediately, original promise will fall through interceptor pipeline.
 Each `onResponse` call comes along with three arguments:
-- `request: Request`
-- `response: T`
-- `promise: OriginalPromise<T>` - not the Promise itself but the object with resolve and reject functions: `{ resolve, reject }`
+- `request: Request` – original request object
+- `response: T` – received response
+- `promise: OriginalPromise<T>` - original Promise handles (`resolve` and `reject` functions)
 
-It allows you to intercept, analyze and modify responses before they are returned. This is useful for scenarios like handling unauthorized responses and refreshing tokens:
+It allows you to intercept, analyze and modify responses before they are returned. This might be useful for scenarios like handling unauthorized responses or refreshing tokens:
 
 ```typescript
 import { Interceptor } from "rest-api-helper";
@@ -62,7 +64,9 @@ const interceptor: Interceptor<Response> = {
     }
 
     if (response.status === 401) {
-      // refresh token, reattempt request, and return result
+      // - refresh access token
+      // - reattempt original request with new headers
+      // - return new response
     }
 
     promise.reject(new Error("Unknown error"));
@@ -74,14 +78,15 @@ const interceptor: Interceptor<Response> = {
 
 ### Client Configuration
 
-Create a new `Client` instance, configure it with the base URL, transport and interceptor (if needed):
+Create a new `Client` instance, configure it with a base URL, transport, interceptor (if needed) and deafault headers (if needed):
 
 ```typescript
 import { Client } from "rest-api-helper";
 
 const client = new Client<Response>("https://api.frankfurter.app")
   .setTransport(transport)
-  .setInterceptor(interceptor);
+  .setInterceptor(interceptor)
+  .setDefaultHeaders({ "content-type": "application/json" });
 ```
 
 ---
@@ -119,7 +124,7 @@ Client<T>
 
  `T` defines the shape of each response. Since transport object responsible for performing requests, it dictates the response type. In order to be compatible, `Transport`, `Interceptor` and `Client` should share the same type.
 
-In example described above, we used `fetch` API that is directly returned from `handle` method. Thus, generic type is native `Response`. But we could easily move response parsing into transport and replace native `Response` with something else:
+In example described above, we used `fetch` API that is directly returned from `handle` method. Thus, generic type is native `Response`. However, we could easily move response parsing into the transport and replace native `Response` with something like this:
 
 ```typescript
 import { Transport, Request } from "rest-api-helper";
@@ -166,7 +171,7 @@ Creates a new request with a path and a method (GET, POST, PUT, DELETE etc.).
 - `path`: a string that follows the base URL - `/users`. Can contain URL parameters, e.g. `/users/:id`
 - `method`: a string that represents an HTTP method, e.g. GET, POST, PUT, DELETE. Case-insensitive.
 
-Throws `Error` if `path` contains duplicate URL parameters, e.g. `/users/:id/devices/:id`
+Throws `Error` if `path` contains duplicate URL parameters. For example: `/users/:id/devices/:id`
 
 ### Methods
 
@@ -181,7 +186,7 @@ Appends or overrides an existing header by key
 
 #### `setHeaders(headers: Record<string, string>): Request`
 
-Merge passed record with existing one.
+Merges passed record with existing one.
 
 - `headers`: an object with key-value pairs, where key is a header name. Keys are case-insensitive
 
@@ -205,7 +210,7 @@ Sets the body of the request.
 
 #### `setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]): Request`
 
-A shorthand for setting the body as JSON, so you don't have to call `JSON.stringify` yourself.
+A shorthand for setting the body as JSON string, so you don't have to call `JSON.stringify` yourself.
 
 - `data`: an object or an array of objects
 
@@ -213,9 +218,9 @@ A shorthand for setting the body as JSON, so you don't have to call `JSON.string
 
 #### `setInterceptionAllowed(allowed: boolean): Request`
 
-Set interception flag setting for request. True by default
+Sets interception flag setting for request. True by default
 
-- `allowed`: a boolean indicating whether interception is allowed or not
+- `allowed`: a boolean value indicating whether interception is allowed or not
 
 ---
 
@@ -231,8 +236,8 @@ Sets the `AbortController` for the request so you can manually abort it.
 
 Sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
 
-- `key`: the parameter key
-- `value`: the parameter value
+- `key`: parameter key
+- `value`: parameter value
 
 ```
 /users/:id -> setUrlParam("id", 2) -> /users/2
@@ -244,8 +249,8 @@ Sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
 
 Sets a query parameter. It will append the key-value pair to the URL.
 
-- `key`: the query parameter key
-- `value`: the query parameter value
+- `key`: query parameter key
+- `value`: query parameter value
 
 ```
 setSearchParam("name", "John") -> /users?name=John
@@ -290,13 +295,12 @@ These subclasses are convenience classes that extend `Request` and set the `meth
 ### Constructor
 
 ```typescript
-constructor(baseURL: string, transport?: Transport<Response>)
+constructor(baseURL: string)
 ```
 
-Creates a new `Client` instance with a base URL and an optional transport.
+Creates a new `Client` instance with a base URL.
 
 - `baseUrl`: the base URL for the client
-- `transport` (optional): a `Transport` instance
 
 ### Methods
 
@@ -304,7 +308,7 @@ Creates a new `Client` instance with a base URL and an optional transport.
 
 Sets the transport for the client.
 
-- `transport`: a `Transport` instance
+- `transport`: a `Transport` object implementation
 
 ---
 
@@ -320,15 +324,15 @@ Sets the default headers for the client.
 
 Sets the interceptor for the client.
 
-- `interceptor`: an `Interceptor` instance
+- `interceptor`: an `Interceptor` object implementation
 
 ---
 
 #### `perform(request: Request): Promise<Response>`
 
-Performs the given request and returns a Promise that resolves with the response.
+Performs the given request and returns a response Promise.
 
-- `request`: a `Request` instance
+- `request`: any `Request` instance including `Post`, `Get` etc.
 
 ---
 
@@ -352,15 +356,13 @@ interface Interceptor<T> {
 
 The `Interceptor<T>` interface defines a single method `onResponse` that is called with the request, response, and the original Promise. It can be used to modify the response or handle errors.
 
-- `request`: the `Request` instance
-- `response`: the response data of a `T` type
-- `promise`: the original Promise
+- `request: Request` – original request object
+- `response: T` – received response
+- `promise: OriginalPromise<T>` - original Promise handles (`resolve` and `reject` functions)
 
 ```typescript
 type OriginalPromise<T> = {
-  resolve: (value: T) => void, reject: (reason?: unknown) => void
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
 };
 ```
-
-This interface allows you to define custom interceptors for handling responses.
-

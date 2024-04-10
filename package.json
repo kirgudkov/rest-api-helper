@@ -1,9 +1,8 @@
 {
   "name": "rest-api-helper",
-  "version": "2.0.0-alpha.16",
-  "description": "Just a little sweet sugar to deal with http requests",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "2.0.0-alpha.17",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/KirillGudkov/rest-api-helper"
@@ -14,8 +13,8 @@
   "homepage": "https://github.com/KirillGudkov/rest-api-helper#readme",
   "scripts": {
     "test": "jest",
-    "clean": "rm -rf ./dist",
-    "build": "npm run clean && tsc && cp src/index.d.ts dist/index.d.ts"
+    "clean": "rm -rf ./lib",
+    "build": "npm run clean && tsc && cp src/index.d.ts lib/index.d.ts"
   },
   "author": "Kirill Gudkov",
   "license": "MIT",
@@ -23,7 +22,7 @@
     "@types/jest": "29.5.12",
     "jest": "29.7.0",
     "ts-jest": "29.1.2",
-    "typescript": "5.4.3"
+    "typescript": "5.4.4"
   },
   "jest": {
     "preset": "ts-jest",

@@ -2,6 +2,10 @@ import { Request } from "./Request";
 
 class Client<T> {
 
+  #transport?: Transport<T>;
+  #interceptors: Interceptor<T>[] = [];
+
+
   #baseURL: string;
   get baseURL() {
     return this.#baseURL;
@@ -9,6 +13,7 @@ class Client<T> {
   set baseURL(value) {
     this.#baseURL = value;
   }
+
 
   #defaultHeaders: Record<string, string>;
   get defaultHeaders() {
@@ -18,33 +23,30 @@ class Client<T> {
     this.#defaultHeaders = value;
   }
 
-  #transport?: Transport<T>;
-  #interceptors: Interceptor<T>[] = [];
 
   constructor(baseURL: string) {
     this.#baseURL = baseURL;
     this.#defaultHeaders = {};
   }
 
+
   setTransport(transport: Transport<T>) {
     this.#transport = transport;
-
     return this;
   }
 
   setDefaultHeaders(headers: Record<string, string>) {
     this.#defaultHeaders = headers;
-
     return this;
   }
 
   setInterceptor(interceptor: Interceptor<T>) {
     this.#interceptors.push(interceptor);
-
     return this;
   }
 
   perform(request: Request) {
+
     request.setBaseURL(this.#baseURL);
     request.setDefaultHeaders(this.#defaultHeaders);
 
@@ -57,12 +59,7 @@ class Client<T> {
       try {
         const response = await this.#transport.handle(request);
 
-        if (!request.isInterceptionAllowed) {
-          resolve(response);
-          return;
-        }
-
-        if (!this.#interceptors.length) {
+        if (!request.isInterceptionAllowed || !this.#interceptors.length) {
           resolve(response);
           return;
         }
