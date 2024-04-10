@@ -1,300 +1,366 @@
-# API Helper
-Wrapped JavaScript `fetch()`. It helps do some network things with pretty cool logs and without ugly boilerplate code
+`rest-api-helper` is a tiny lightweight package that abstracts the process of making HTTP requests.
 
-![npm-publish](https://github.com/KirillGudkov/rest-api-helper/actions/workflows/npm-publish.yml/badge.svg)
 
-> ##### Changelog (0.1.0):
-> - few url param support (f.e: `'get/{type}/{id}'`)
-> - "headers" property is not required in `config.json`
-> - `text/plain` responses are available
+# Installation
 
-> ##### Breaking changes (0.1.0):
-> - New API (method names, method chaining template. See below). 
+Install the package using npm:
 
-> ##### Changelog (0.1.3):
-> - fix of query parameters encoding
-> - query parameters support for all queries types (`post`, `get`,...)
-> - api for response interception
-> - mark `RestApiHelper.configure` as deprecated. It's will be removed in next version. Use `RestApiHelper.withConfig` instead 
-> - mark `Request.withParam` as deprecated. It's will be removed in next version. Use `Request.withUrlParam` instead
-
-> ##### Changelog (0.1.5):
-> Response interception:
-> there is two new interfaces `Interceptor` and `OnInterceptDelegate`
-> for example see [Interception](#interception)
-
-> ##### Changelog (0.1.54):
-> added AbortController to abort fetch
-> for example see [AbortController](#AbortController)
-
-## Installation
-    npm install rest-api-helper
-    or
-    yarn add rest-api-helper
-## Usage
-First thing first you need to configure helper:   
-  - Create `your_config.json`
-  - Define basic things:
-  
-  ```
-{
-    "baseURL": "http://your.api.base.url/api/v1/",
-    "logger": true
-    "headers": {
-        "content-Type": "application/json"
-    },
-    "statusDescription": {
-        "200": "OK",
-        "401": "Invalid API token"
-    },
-    "successStatus": [
-        200
-    ],
-    "request": {
-       "getSomethingWithQuery": {
-          "method": "get",
-          "url": "something/get"
-       },
-       "getSomethingById": {
-          "method": "get",
-          "url": "something/get/{id}"
-       }
-    }
-}
-```
- - Declare your requests in "request" property. 
- - Call `RestApiHelper.builder().withConfig(require('your_config.json'));` first
- - Define yor API class. Example:
-```typescript
-import { RestApiHelper } from 'rest-api-helper';
-import config from './config';
-
-class NetworkManager { 
-
-    constructor() {
-        RestApiHelper.builder()
-            .withConfig(require('config.json')));
-    }
-    
-     public getSomethingById<T>(body: Body, id: string, token: string): Promise<Response<T>> {
-        try {
-           return await RestApiHelper.build<T>('getSomethingById')
-              .withBody(body)
-              .withUrlParam('id', id)
-              .withHeaders({'Authorization': token})
-              .fetch();
-         } catch (exception) {
-            throw new CustomException(exception);
-         }
-    }
-
-    public async getSomethingWithQuery<T>(userId, token): Promise<Response<T>> {
-        try {
-          return await RestApiHelper.build<T>('getSomethingWithQuery')
-            .withQueryParams({ userId })
-            .withHeaders({'Authorization': token})
-            .fetch()
-        } catch(exception) {
-          throw new CustomException(exception);
-        }
-    }
-}
-```
-### Interception
-- Create a class implementing `Interceptor`
-- Specify the statuses you want to intercept:
-
-```typescript
-import { Interceptor, OnInterceptDelegate } from 'rest-api-helper';
-
-export class NetworkResponseInterceptor implements Interceptor {
-
-  public statuses = [401]
-
-  public delegate?: OnInterceptDelegate
-}
+```bash
+npm install rest-api-helper
 ```
 
-### AbortController
-
-```typescript
-let controller = new AbortController()
-
-try {
-  return await RestApiHelper.build<T>('getSomethingWithQuery')
-    .withAbortController(controller)
-    .fetch()
-} catch(exception) {
-  throw new CustomException(exception);
-}
-
-//...
-
-controller.abort()
+or yarn:
+```bash
+yarn add rest-api-helper
 ```
 
-Then implement OnInterceptDelegate in your networking layer:
+# Usage
+
+To perform any request it is required to:
+
+- Define _transport_ aka the way you're going to communicate
+- Configure _client_ to glue everything together (base url, headers, transport etc)
+- Create _request_ object
+
+
+---
+
+### Transport implementation
+
+The `Transport` interface obliges you to implement one single method `handle`. It can do whatever you want whether it's `fetch` or `XHR` or `setTimeout` mock. In most cases, you're going to use the fetch API:
 
 ```typescript
-import { Interceptor, OnInterceptDelegate } from 'rest-api-helper';
+import { Transport } from "rest-api-helper";
 
-export class NetworkManager implements OnInterceptDelegate {
-  
-  private interceptor: Interceptor = new NetworkResponseInterceptor();
-
-  constructor() {
-    this.interceptor.delegate = this;
+const transport: Transport<Response> = {
+  handle(request) {
+    return fetch(request.url.href, request);
   }
+};
+```
 
-  RestApiHelper.builder()
-     .withInterceptor(this.interceptor)
-     .withConfig(api_config);
+---
 
-  public async onIntercept(request: Request<any>, resolver: (value: PromiseLike<any> | any) => void, response: Response<any>) {
-    // each intercepted response with the specified status
-    // fall back here with all data you need (request, response and promise resolver)
-    // intercepted request will be deferred until you call resolver()
-    // this can be used to update the token - call the refreshMyToken() function and then call
-    // resolver ()
-    
-    // eg:
-    this.refresh<RefreshResponse>()
-      .then(async (refreshResponse) => {
+### Interceptor implementation (Optional)
 
-         const deferred = await request // <-- here your intercepted request will be called again with new access token
-           .withHeaders({ Authorization: `Bearer ${refreshResponse.body.access_token}` })
-           .fetch();
- 
-         resolver(deferred); // <-- here your intercepted request will be resolved with new response
-       })
-       .catch(exception => {
-         throw new ...
-       });
+The `Interceptor` interface binds you to implement `onResponse` method. Instead of being resolved immediately, original promise will fall through interceptor pipeline.
+Each `onResponse` call comes along with three arguments:
+- `request: Request` – original request object
+- `response: T` – received response
+- `promise: OriginalPromise<T>` - original Promise handles (`resolve` and `reject` functions)
+
+It allows you to intercept, analyze and modify responses before they are returned. This might be useful for scenarios like handling unauthorized responses or refreshing tokens:
+
+```typescript
+import { Interceptor } from "rest-api-helper";
+
+const interceptor: Interceptor<Response> = {
+  onResponse: async (request, response, promise) => {
+    if (response.ok) {
+      promise.resolve(response); // bypass
+      return;
+    }
+
+    if (response.status === 401) {
+      // - refresh access token
+      // - reattempt original request with new headers
+      // - return new response
+    }
+
+    promise.reject(new Error("Unknown error"));
   }
-}
+};
+```
+
+---
+
+### Client Configuration
+
+Create a new `Client` instance, configure it with a base URL, transport, interceptor (if needed) and deafault headers (if needed):
+
+```typescript
+import { Client } from "rest-api-helper";
+
+const client = new Client<Response>("https://api.frankfurter.app")
+  .setTransport(transport)
+  .setInterceptor(interceptor)
+  .setDefaultHeaders({ "content-type": "application/json" });
+```
+
+---
+
+### Request Execution
+
+Scaffold request and perform it (you can use predefined classes like `Get`, `Post` etc. or create it from scratch using `Request`):
+
+```typescript
+import { Get, Request } from "rest-api-helper";
+
+const get = new Get("/latest")
+  .setSearchParam("amount", 10)
+  .setSearchParam("from", "GBP")
+  .setSearchParam("to", "USD");
+
+
+const request = new Request("/latest", "get")
+  .setSearchParam("amount", 10)
+  .setSearchParam("from", "GBP")
+  .setSearchParam("to", "USD");
+
+const response = await client.perform(request);
+const parsed = await response.json();
+```
+
+---
+
+As you might have noticed `Transport`, `Interceptor` and `Client` have generic type arguments:
+```
+Transport<T>
+Interceptor<T>
+Client<T>
+```
+
+ `T` defines the shape of each response. Since transport object responsible for performing requests, it dictates the response type. In order to be compatible, `Transport`, `Interceptor` and `Client` should share the same type.
+
+In example described above, we used `fetch` API that is directly returned from `handle` method. Thus, generic type is native `Response`. However, we could easily move response parsing into the transport and replace native `Response` with something like this:
+
+```typescript
+import { Transport, Request } from "rest-api-helper";
+
+type CustomResponse = {
+  data: unknown;
+  status: number;
+};
+
+const transport: Transport<CustomResponse> = {
+  async handle(request: Request) {
+    const response = await fetch(request.url, request);
+    const parsed = await reponse.json();
+
+    return { data: parsed, status: response.status } as CustomResponse;
+  }
+};
+
+// ...
+// const interceptor: Interceptor<CustomResponse> = {...}
+// const client = new Client<CustomResponse>(...)
+```
+
+# API Reference
+
+## `Request` Class
+
+### Properties
+
+- `readonly url`: `URL`
+- `readonly method`: `string`
+- `readonly headers`: `Record<string, string>`
+- `readonly isInterceptionAllowed`: `boolean`
+- `readonly body`: `BodyInit | null`
+
+### Constructor
+
+```typescript
+constructor(path: string, method: string)
+```
+
+Creates a new request with a path and a method (GET, POST, PUT, DELETE etc.).
+
+- `path`: a string that follows the base URL - `/users`. Can contain URL parameters, e.g. `/users/:id`
+- `method`: a string that represents an HTTP method, e.g. GET, POST, PUT, DELETE. Case-insensitive.
+
+Throws `Error` if `path` contains duplicate URL parameters. For example: `/users/:id/devices/:id`
+
+### Methods
+
+#### `setHeader(key: string, value: string): Request`
+
+Appends or overrides an existing header by key
+
+- `key`: a header name, case-insensitive
+- `value`: a header value
+
+---
+
+#### `setHeaders(headers: Record<string, string>): Request`
+
+Merges passed record with existing one.
+
+- `headers`: an object with key-value pairs, where key is a header name. Keys are case-insensitive
+
+---
+
+#### `removeHeader(key: string): Request`
+
+Removes a header by key, if it exists.
+
+- `key`: a header name, case-insensitive
+
+---
+
+#### `setBody(data: BodyInit): Request`
+
+Sets the body of the request.
+
+- `data`: the request body data
+
+---
+
+#### `setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]): Request`
+
+A shorthand for setting the body as JSON string, so you don't have to call `JSON.stringify` yourself.
+
+- `data`: an object or an array of objects
+
+---
+
+#### `setInterceptionAllowed(allowed: boolean): Request`
+
+Sets interception flag setting for request. True by default
+
+- `allowed`: a boolean value indicating whether interception is allowed or not
+
+---
+
+#### `setAbortController(abortController: AbortController): Request`
+
+Sets the `AbortController` for the request so you can manually abort it.
+
+- `abortController`: an `AbortController` instance
+
+---
+
+#### `setUrlParam(key: string, value: string | number): Request`
+
+Sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
+
+- `key`: parameter key
+- `value`: parameter value
+
+```
+/users/:id -> setUrlParam("id", 2) -> /users/2
 ``` 
-> Response contains body and headers. If You need to know about response headers, just call `response.headers` besides `response.body`
- - Then call `getSomethingById()` wherever you need. Example:
- ```typescript
-networkManager.getSomethingById<ResponseDataObject>(body, id, token)
-    .then(response => { // response is ResponseDataObject because generic
-	    // do something
-    })
-    .catch(exception => { /* handle error */ });
-```
 
-> - Statuses that are not listed as `“successStatus”` in `config.json` will be thrown into `catch()`
+---
 
-### `multipart/form-data` example:
- ```javascript
-async uploadPhoto(file: File) {
-    const formData = new FormData();
-    
-    formData.append('file', {
-        uri: file.getUri()
-    });
-    
-    formData.append('name', file.getName());
-    
-    const response = await RestApiHelper
-     	.build('uploadPhoto')
-     	.withBody(formData)
-     	.fetch();
-    return new Response(response.body);
-}
-```
-> Don't forget declare `"content-type": "multipart/form-data"` header for this kind of request
+#### `setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>): Request`
+
+Sets a query parameter. It will append the key-value pair to the URL.
+
+- `key`: query parameter key
+- `value`: query parameter value
 
 ```
-"uploadPhoto": {
-    "method": "post",
-     "url": "/upload",
-     "headers": {
-        "content-type": "multipart/form-data"
-     }
-}
-      
-```   
-##
-### Logger:
- - If you need logs (which are pretty cool btw :)), set `logger: true` in config.json
-##### Important for React-Native:
-> Logger might produce crashes at release builds or in debugger-off mode. 
-Because that kind of logs supported only in V8 engine. We recommend use this hack before `RestApiHelper.config()`:
-```javascript
-config.logger = __DEV__ && Boolean(global.origin);
-
-RestApiHelper.builder()
-  .withConfig(config);
+setSearchParam("name", "John") -> /users?name=John
+setSearchParam("names", ["John", "Alice"]) -> /users?names[]=John&names[]=Alice
 ```
 
-### Custom Logger:
+---
+
+#### `setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>): Request`
+
+Sets multiple query parameters. It will append the key-value pairs to the URL.
+
+- `params`: an object with key-value pairs representing the query parameters
 
 ```
-RestApiHelper.builder()
-  ...
-  .withLogger(new Logger());
+setSearchParams({ name: "John", age: 30 }) -> /users?name=John&age=30
+setSearchParams({ names: ["John", "Alice"] }) -> /users?names[]=John&names[]=Alice
 ```
 
-`Logger` have to implement `RestApiHelperLogger` interface
+---
 
-Example:
+## Subclasses of `Request`
+
+- `Get`
+- `Post`
+- `Put`
+- `Delete`
+- `Patch`
+- `Head`
+
+These subclasses are convenience classes that extend `Request` and set the `method` property accordingly.
+
+---
+
+## `Client` Class
+
+### Properties
+
+- `baseURL`: `string`
+- `defaultHeaders`: `Record<string, string>`
+
+### Constructor
+
 ```typescript
-import { RestApiHelperLogger } from 'rest-api-helper'
+constructor(baseURL: string)
+```
 
-export class Logger implements RestApiHelperLogger {
+Creates a new `Client` instance with a base URL.
 
-  constructor(private enabled: boolean, private filters: string[]) {}
+- `baseUrl`: the base URL for the client
 
-  error(message: string, log: { [key: string]: any }) {
-    this.log(`❌ ${message}`, log)
-  }
+### Methods
 
-  info(message: string, log: { [key: string]: any }) {
-    this.log(`➡️  ${message}`, log)
-  }
+#### `setTransport(transport: Transport<Response>): Client<Response>`
 
-  success(message: string, log: { [key: string]: any }) {
-    this.log(`⬅️  ${message}`, log)
-  }
+Sets the transport for the client.
 
-  private log(message: string, log: { [key: string]: any }) {
-    if (this.enabled) {
-      console.log(message)
-      // In case if you need to show verbose logs only for specific endpoint or smth
-      if (this.filters.some(filter => message.includes(filter))) {
-        for (const logKey in log) {
-          console.log(logKey, log[logKey])
-        }
-      }
-    }
-  }
+- `transport`: a `Transport` object implementation
+
+---
+
+#### `setDefaultHeaders(headers: Record<string, string>): Client<Response>`
+
+Sets the default headers for the client.
+
+- `headers`: an object with key-value pairs representing the default headers
+
+---
+
+#### `setInterceptor(interceptor: Interceptor<Response>): Client<Response>`
+
+Sets the interceptor for the client.
+
+- `interceptor`: an `Interceptor` object implementation
+
+---
+
+#### `perform(request: Request): Promise<Response>`
+
+Performs the given request and returns a response Promise.
+
+- `request`: any `Request` instance including `Post`, `Get` etc.
+
+---
+
+## `Transport<T>` Interface
+
+```typescript
+interface Transport<T> {
+  handle(request: Request): Promise<T>;
 }
 ```
 
-> Then logger will be working only in dev mode and debug-on mode   
+The `Transport` interface defines a single method `handle` that takes a `Request` instance and returns a Promise that resolves with the response of `T` type.
 
-## Specific url:
-- If You need use a specific url for some requests, 
-just put full url string in "url" property, like:
-```
-"getSomething": {
-   "method": "get",
-   "url": "http://your.api.specific.url/api/v1/something/get"
+## `Interceptor<T>` Interface
+
+```typescript
+interface Interceptor<T> {
+  onResponse(request: Request, response: T, promise: OriginalPromise<T>): Promise<void>;
 }
 ```
-- If request throws error associated with an unsuccessful status (like 500), You can parse it and handle. For example:
-```javascript
-...}).catch(error => {
-    console.log(error.name); // "bad" status, like 401
-    console.log(error.description); // description, like "Invalid token"
-    console.log(error.message); // response body, for example:  {error: 'Authorization has expired'}
-});
-```
 
+The `Interceptor<T>` interface defines a single method `onResponse` that is called with the request, response, and the original Promise. It can be used to modify the response or handle errors.
 
-### Request creating without description in config file: 
-```javascript
-const request = RestApiHelper.post(url) // or get, put ...
+- `request: Request` – original request object
+- `response: T` – received response
+- `promise: OriginalPromise<T>` - original Promise handles (`resolve` and `reject` functions)
+
+```typescript
+type OriginalPromise<T> = {
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+};
 ```
-Now you can use all request's methods, like `withHeaders`, `withBody` and etc.

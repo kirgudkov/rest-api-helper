@@ -1,9 +1,9 @@
-name: npm-publish
+name: npm-publish-alpha
 
 on:
   push:
     branches:
-      - master
+      - '*-alpha.*'
 
 jobs:
   npm-publish:
@@ -26,4 +26,4 @@ jobs:
         uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_PUBLISH_SECRET }}
-          tag: latest
+          tag: alpha

@@ -1,6 +1,4 @@
 .idea
+.vscode
 node_modules
-example
-package-lock.json
-.nyc_output
-todo.txt
+lib
