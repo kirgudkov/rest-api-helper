@@ -1,7 +1,5 @@
-`rest-api-helper` is a lightweight package that simplifies and abstracts the process of making HTTP requests.
-It provides a modular and extensible approach, allowing to define custom transport mechanisms, intercept and modify responses, and configure requests with ease. 
+`rest-api-helper` is a tiny lightweight package that abstracts the process of making HTTP requests.
 
-The library promotes separation of concerns and offers a structured API for creating requests, setting headers, body, URL and query parameters.
 
 # Installation
 
