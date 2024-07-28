@@ -2,7 +2,7 @@ export class Request {
 
 	readonly url: URL;
 	readonly method: string;
-	readonly headers: Record<string, string>;
+	readonly headers: Headers;
 	readonly body: BodyInit | null;
 	readonly isInterceptionAllowed: boolean;
 
@@ -19,7 +19,7 @@ export class Request {
 	 * @param key a header name, case-insensitive
 	 * @param value a header value
 	 */
-	setHeader(key: string, value: string): Request;
+	setHeader<K extends keyof Headers>(key: K, value: Headers[K]): Request;
 
 	/**
 	 * Set headers from an object. Overrides existing keys, so basically it's a merge.
@@ -33,7 +33,7 @@ export class Request {
 	 * @param key a header name, case-insensitive
 	 * @returns {Request}
 	 */
-	removeHeader(key: string): Request;
+	removeHeader(key: keyof Headers): Request;
 
 	/**
 	 * Set the body of the request.
@@ -119,7 +119,7 @@ export class Head extends Request {
  */
 export class Client<Response> {
 	baseURL: string;
-	defaultHeaders: Record<string, string>;
+	defaultHeaders: Headers;
 
 	constructor(baseURL: string);
 
@@ -127,7 +127,7 @@ export class Client<Response> {
 
 	setInterceptor(interceptor: Interceptor<Response>): Client<Response>;
 
-	setDefaultHeaders(headers: Record<string, string>): Client<Response>;
+	setDefaultHeaders(headers: Headers): Client<Response>;
 
 	perform(request: Request): Promise<Response>;
 }

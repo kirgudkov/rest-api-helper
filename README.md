@@ -102,7 +102,7 @@ const get = new Get("/latest")
   .setSearchParam("to", "USD");
 
 
-const request = new Request("/latest", "get")
+const request = new Request("get", "/latest")
   .setSearchParam("amount", 10)
   .setSearchParam("from", "GBP")
   .setSearchParam("to", "USD");
@@ -161,7 +161,7 @@ const transport: Transport<CustomResponse> = {
 ### Constructor
 
 ```typescript
-constructor(path: string, method: string)
+constructor(method: string, path: string)
 ```
 
 Creates a new request with a path and a method (GET, POST, PUT, DELETE etc.).
@@ -279,7 +279,7 @@ setSearchParams({ names: ["John", "Alice"] }) -> /users?names[]=John&names[]=Ali
 - `Patch`
 - `Head`
 
-These subclasses are convenience classes that extend `Request` and set the `method` property accordingly.
+These are convenience classes that extend `Request` and set the `method` property accordingly.
 
 ---
 
