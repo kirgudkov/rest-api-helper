@@ -1,174 +1,158 @@
 import { URL } from "./URL";
 
 class Request {
+	readonly url = new URL();
+	readonly method: string;
+	readonly headers: Record<string, string> = {};
 
-  readonly method: string;
-  readonly headers: Record<string, string> = {};
-  readonly url = new URL();
+	constructor(method: string, path: string) {
+		this.method = method.toLowerCase();
+		this.url.pathname = path;
+	}
 
-  #isInterceptionAllowed = true;
-  get isInterceptionAllowed() {
-    return this.#isInterceptionAllowed;
-  }
+	#signal: AbortSignal | null = null;
 
-  #body: BodyInit | null = null;
-  get body() {
-    return this.#body;
-  }
+	#isInterceptionAllowed = true;
+	get isInterceptionAllowed() {
+		return this.#isInterceptionAllowed;
+	}
 
-  #signal: AbortSignal | null = null;
+	#body: BodyInit | null = null;
+	get body() {
+		return this.#body;
+	}
 
-  constructor(path: string, method: string) {
-    this.url.pathname = path;
-    this.method = method.toLowerCase();
-  }
+	setBaseURL(url: string) {
+		const [protocol, host] = url.split("://");
 
-  setBaseURL(url: string) {
-    const [protocol, host] = url.split("://");
+		this.url.protocol = protocol;
+		this.url.host = host;
 
-    this.url.protocol = protocol;
-    this.url.host = host;
+		return this;
+	};
 
-    return this;
-  };
+	setHeaders(headers: Record<string, string>) {
+		for (const [key, value] of Object.entries(headers)) {
+			this.headers[key.toLowerCase()] = value;
+		}
 
-  setHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(rawKey => {
-      const formattedKey = rawKey.toLowerCase();
-      this.headers[formattedKey] = headers[rawKey];
-    });
+		return this;
+	};
 
-    return this;
-  };
+	setHeader(key: string, value: string) {
+		this.headers[key.toLowerCase()] = value;
 
-  setHeader(key: string, value: string) {
-    this.headers[key.toLowerCase()] = value;
+		return this;
+	};
 
-    return this;
-  };
+	removeHeader(key: string) {
+		if (this.headers[key.toLowerCase()]) {
+			delete this.headers[key.toLowerCase()];
+		}
 
-  removeHeader(key: string) {
-    if (this.headers[key.toLowerCase()]) {
-      delete this.headers[key.toLowerCase()];
-    }
+		return this;
+	};
 
-    return this;
-  };
+	setDefaultHeaders(headers: Record<string, string>) {
+		for (const [key, value] of Object.entries(headers)) {
+			if (!this.headers[key.toLowerCase()]) {
+				this.headers[key.toLowerCase()] = value;
+			}
+		}
 
-  setDefaultHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(rawKey => {
-      const formattedKey = rawKey.toLowerCase();
+		return this;
+	};
 
-      if (!this.headers[formattedKey]) {
-        this.headers[formattedKey] = headers[rawKey];
-      }
-    });
+	setBody(data: BodyInit) {
+		this.#body = data;
 
-    return this;
-  };
+		return this;
+	}
 
-  setBody(data: BodyInit) {
-    this.#body = data;
+	setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]) {
+		try {
+			this.#body = JSON.stringify(data);
+		}
+		catch (error) {
+			throw new Error("Request: failed to stringify the body");
+		}
 
-    return this;
-  }
+		return this;
+	}
 
-  setBodyJSON(data: Record<string, unknown> | Record<string, unknown>[]) {
-    try {
-      this.#body = JSON.stringify(data);
-    }
-    catch (error) {
-      throw new Error("Request: failed to stringify the body");
-    }
+	setUrlParam(key: string, value: string | number) {
+		this.url.pathname = this.url.pathname.replace(`:${key}`, value.toString());
 
-    return this;
-  }
+		return this;
+	};
 
-  setUrlParam(key: string, value: string | number) {
-    this.url.pathname = this.url.pathname.replace(`:${key}`, value.toString());
+	setInterceptionAllowed(allowed: boolean) {
+		this.#isInterceptionAllowed = allowed;
 
-    return this;
-  };
+		return this;
+	}
 
-  setInterceptionAllowed(allowed: boolean) {
-    this.#isInterceptionAllowed = allowed;
+	setAbortController(abortController: AbortController) {
+		this.#signal = abortController.signal;
 
-    return this;
-  }
+		return this;
+	}
 
-  setAbortController(abortController: AbortController) {
-    this.#signal = abortController.signal;
+	setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>) {
+		if (Array.isArray(value)) {
+			value.forEach(item =>
+				this.url.searchParams.append(key, item.toString())
+			);
+		} else {
+			this.url.searchParams.append(key, value.toString());
+		}
 
-    return this;
-  }
+		return this;
+	};
 
-  setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>) {
-    if (Array.isArray(value)) {
-      value.forEach((item) => {
-        this.url.searchParams.append(key, item.toString());
-      });
+	setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>) {
+		for (const [key, value] of Object.entries(params)) {
+			this.setSearchParam(key, value);
+		}
 
-      return this;
-    }
-
-    this.url.searchParams.append(key, value.toString());
-
-    return this;
-  };
-
-  setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>) {
-    Object.keys(params).forEach(key => {
-      const value = params[key];
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          this.url.searchParams.append(key, item.toString());
-        });
-
-        return;
-      }
-
-      this.url.searchParams.append(key, value.toString());
-    });
-
-    return this;
-  }
+		return this;
+	}
 }
 
 class Get extends Request {
-  constructor(path: string) {
-    super(path, "get");
-  }
+	constructor(path: string) {
+		super("get", path);
+	}
 }
 
 class Post extends Request {
-  constructor(path: string) {
-    super(path, "post");
-  }
+	constructor(path: string) {
+		super("post", path);
+	}
 }
 
 class Put extends Request {
-  constructor(path: string) {
-    super(path, "put");
-  }
+	constructor(path: string) {
+		super("put", path);
+	}
 }
 
 class Delete extends Request {
-  constructor(path: string) {
-    super(path, "delete");
-  }
+	constructor(path: string) {
+		super("delete", path);
+	}
 }
 
 class Patch extends Request {
-  constructor(path: string) {
-    super(path, "patch");
-  }
+	constructor(path: string) {
+		super("patch", path);
+	}
 }
 
 class Head extends Request {
-  constructor(path: string) {
-    super(path, "head");
-  }
+	constructor(path: string) {
+		super("head", path);
+	}
 }
 
 export { Request, Get, Post, Put, Delete, Patch, Head };

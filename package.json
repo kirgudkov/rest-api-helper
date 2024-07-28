@@ -1,11 +1,11 @@
 {
   "name": "rest-api-helper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/KirillGudkov/rest-api-helper"
+    "url": "https://github.com/kirgudkov/rest-api-helper"
   },
   "scripts": {
     "test": "jest",
@@ -17,8 +17,8 @@
   "devDependencies": {
     "@types/jest": "29.5.12",
     "jest": "29.7.0",
-    "ts-jest": "29.1.2",
-    "typescript": "5.4.4"
+    "ts-jest": "29.2.3",
+    "typescript": "5.5.4"
   },
   "jest": {
     "preset": "ts-jest",

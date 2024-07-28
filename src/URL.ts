@@ -2,53 +2,53 @@ import { URLSearchParams } from "./URLSearchParams";
 
 export class URL {
 
-  host: string = "";
-  protocol: string = "";
-  searchParams = new URLSearchParams();
+	host: string = "";
+	protocol: string = "";
+	searchParams = new URLSearchParams();
 
-  private _pathname: string = "";
+	private _pathname: string = "";
 
-  constructor(url?: string) {
-    if (!url) {
-      return;
-    }
+	constructor(url?: string) {
+		if (!url) {
+			return;
+		}
 
-    const regex = /^(\w+):\/\/([^\/]+)(\/.*)?/;
-    const match = url.match(regex);
+		const regex = /^(\w+):\/\/([^\/]+)(\/.*)?/;
+		const match = url.match(regex);
 
-    if (!match) {
-      throw new Error("Invalid URL");
-    }
+		if (!match) {
+			throw new Error("Invalid URL");
+		}
 
-    this.protocol = match[1];
-    this.host = match[2];
-    this.pathname = match[3] ?? "";
-  }
+		this.protocol = match[1];
+		this.host = match[2];
+		this.pathname = match[3] ?? "";
+	}
 
-  get pathname() {
-    return this._pathname;
-  }
+	get pathname() {
+		return this._pathname;
+	}
 
-  set pathname(path: string) {
-    const pattern = /:\w+/g;
-    const matches = path.match(pattern);
+	set pathname(path: string) {
+		const pattern = /:\w+/g;
+		const matches = path.match(pattern);
 
-    if (matches) {
-      const uniqueMatches = new Set(matches);
-      if (uniqueMatches.size !== matches.length) {
-        throw new Error("URL: path contains duplicate url param keys");
-      }
-    }
+		if (matches) {
+			const uniqueMatches = new Set(matches);
+			if (uniqueMatches.size !== matches.length) {
+				throw new Error("URL: path contains duplicate url param keys");
+			}
+		}
 
-    this._pathname = path;
-  }
+		this._pathname = path;
+	}
 
-  get href() {
-    return `${this.protocol}://${this.host}${this.pathname}${this.searchParams.toString()}`;
-  }
+	get href() {
+		return `${this.protocol}://${this.host}${this.pathname}${this.searchParams.toString()}`;
+	}
 
-  toString() {
-    return this.href;
-  }
+	toString() {
+		return this.href;
+	}
 }
 
