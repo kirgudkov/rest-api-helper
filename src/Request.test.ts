@@ -47,13 +47,13 @@ describe("Request", () => {
 	it("should set multiple headers", () => {
 		request.setHeaders({
 			"Content-Type": "application/json",
-			"accept": "application/json"
+			"accept": "application/json",
 		});
 
 		expect(Object.keys(request.headers).length).toBe(2);
 		expect(request.headers).toEqual({
 			"content-type": "application/json",
-			"accept": "application/json"
+			"accept": "application/json",
 		});
 	});
 
@@ -67,19 +67,19 @@ describe("Request", () => {
 	it("should set default headers and do not override previous", () => {
 		request.setHeaders({
 			"content-type": "application/json",
-			"accept": "application/json"
+			"accept": "application/json",
 		});
 
 		request.setDefaultHeaders({
 			"content-type": "multipart/form-data",
-			"Cache-Control": "no-cache"
+			"Cache-Control": "no-cache",
 		});
 
 		expect(Object.keys(request.headers).length).toBe(3);
 		expect(request.headers).toEqual({
 			"content-type": "application/json",
 			"accept": "application/json",
-			"cache-control": "no-cache"
+			"cache-control": "no-cache",
 		});
 	});
 
@@ -112,7 +112,7 @@ describe("Request", () => {
 		request.setSearchParams({
 			id: 1,
 			name: "test",
-			items: [1, 2, 3]
+			items: [1, 2, 3],
 		});
 		expect(request.url.searchParams.get("id")).toBe("1");
 		expect(request.url.searchParams.get("name")).toBe("test");
@@ -158,5 +158,11 @@ describe("Request", () => {
 		const post = new Post(path);
 		expect(post.method).toBe("post");
 		expect(post.url.pathname).toBe(path);
+	});
+
+	it("should set the abort controller", () => {
+		const controller = new AbortController();
+		request.setAbortController(controller);
+		expect(request.signal).toBe(controller.signal);
 	});
 });

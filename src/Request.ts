@@ -10,7 +10,7 @@ class Request {
 		this.url.pathname = path;
 	}
 
-	#signal: AbortSignal | null = null;
+	signal: AbortSignal | null = null;
 
 	#isInterceptionAllowed = true;
 	get isInterceptionAllowed() {
@@ -93,7 +93,7 @@ class Request {
 	}
 
 	setAbortController(abortController: AbortController) {
-		this.#signal = abortController.signal;
+		this.signal = abortController.signal;
 
 		return this;
 	}
