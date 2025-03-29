@@ -23,9 +23,9 @@ probably going to use the fetch API:
 
 ```typescript
 class FetchTransport implements Transport<Response> {
-  perform(request) {
-    return fetch(request.url.href, request);
-  }
+	perform(request) {
+		return fetch(request.url.href, request);
+	}
 };
 ```
 
@@ -52,42 +52,42 @@ This might be useful for scenarios like handling 401 statuses, refreshing tokens
 
 ```typescript
 class UnauthorizedInterceptor implements Interceptor<Response> {
-  // ...
-  async onResponse(request, response, client) {
-    if (response.status === 401) {
-      // Refresh token
-      const refreshRequest = new Post(Endpoint.refresh)
-        .setBodyJSON({ "refreshToken": refreshToken });
+	// ...
+	async onResponse(request, response, client) {
+		if (response.status === 401) {
+			// Refresh token
+			const refreshRequest = new Post(Endpoint.refresh)
+				.setBodyJSON({ "refreshToken": refreshToken });
 
-      const { accessToken } = await client.perform(refreshRequest);
-      request.setHeader("Authorization", `Bearer ${accessToken}`);
-      return client.perform(request);
-    }
+			const { accessToken } = await client.perform(refreshRequest);
+			request.setHeader("Authorization", `Bearer ${accessToken}`);
+			return client.perform(request);
+		}
 
-    // Or pass the response down the chain
-    return response;
-  }
+		// Or pass the response down the chain
+		return response;
+	}
 };
 
 class RetryInterceptor implements Interceptor<Response> {
-  // ...
-  async onResponse(request, response, client) {
-    if (!response.ok) {
-      try {
-        // Request counts attempts and throws an error if it exceeds the limit
-        const retryResponse = await client.perform(request);
+	// ...
+	async onResponse(request, response, client) {
+		if (!response.ok) {
+			try {
+				// Request counts attempts and throws an error if it exceeds the limit
+				const retryResponse = await client.perform(request);
 
-        if (retryResponse.ok) {
-          return retryResponse;
-        }
-      }
-      catch (error) {
-        // Maximum attempts reached
-      }
-    }
+				if (retryResponse.ok) {
+					return retryResponse;
+				}
+			}
+			catch (error) {
+				// Maximum attempts reached
+			}
+		}
 
-    return response;
-  }
+		return response;
+	}
 };
 ```
 
@@ -103,9 +103,9 @@ const unauthorizedInterceptor = new UnauthorizedInterceptor();
 const retryInterceptor = new RetryInterceptor();
 
 const client = new Client<Response>(fetchTransport, "https://api.frankfurter.app")
-  .setInterceptor(unauthorizedInterceptor)
-  .setInterceptor(retryInterceptor)
-  .setDefaultHeaders({ "content-type": "application/json" });
+	.setInterceptor(unauthorizedInterceptor)
+	.setInterceptor(retryInterceptor)
+	.setDefaultHeaders({ "content-type": "application/json" });
 ```
 
 ---
@@ -116,15 +116,15 @@ Scaffold request and perform it (you can use predefined classes like `Get`, `Pos
 
 ```typescript
 const get = new Get("/latest")
-  .setSearchParam("amount", 10)
-  .setSearchParam("from", "GBP")
-  .setSearchParam("to", "USD");
+	.setSearchParam("amount", 10)
+	.setSearchParam("from", "GBP")
+	.setSearchParam("to", "USD");
 
 
 const request = new Request("get", "/latest")
-  .setSearchParam("amount", 10)
-  .setSearchParam("from", "GBP")
-  .setSearchParam("to", "USD");
+	.setSearchParam("amount", 10)
+	.setSearchParam("from", "GBP")
+	.setSearchParam("to", "USD");
 
 const response = await client.perform(request);
 const parsed = await response.json();
@@ -148,22 +148,22 @@ parsing into the transport and replace native `Response` with something like thi
 
 ```typescript
 type CustomResponse = {
-  data: unknown;
-  status: number;
+	data: unknown;
+	status: number;
 };
 
 class FetchTransport implements Transport<CustomResponse> {
-  async perform(request: Request): CustomResponse {
-    const rawResponse = await fetch(request.url, request);
+	async perform(request: Request): CustomResponse {
+		const rawResponse = await fetch(request.url, request);
 
-    // or .text() or whatever based on content-type header
-    const parsedResponse = await rawResponse.json();
+		// or .text() or whatever based on content-type header
+		const parsedResponse = await rawResponse.json();
 
-    return {
-      data: parsedResponse,
-      status: rawResponse.status,
-    };
-  }
+		return {
+			data: parsedResponse,
+			status: rawResponse.status,
+		};
+	}
 };
 ```
 
@@ -370,7 +370,7 @@ Performs the given request and returns a response Promise.
 
 ```typescript
 interface Transport<T> {
-  perform(request: Request): Promise<T>;
+	perform(request: Request): Promise<T>;
 }
 ```
 
@@ -380,7 +380,7 @@ The `Transport` interface defines a single method `perform` that takes a `Reques
 
 ```typescript
 interface Interceptor<T> {
-  onResponse(request: Request, response: T, client: Client<T>): Promise<T>;
+	onResponse(request: Request, response: T, client: Client<T>): Promise<T>;
 }
 ```
 
