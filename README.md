@@ -48,8 +48,7 @@ It allows you to
 - retry failed requests
 - perform another requests
 
-This might be useful for scenarios like handling 401 statuses, refreshing tokens and retying:
-
+This might be useful for scenarios like handling 401 statuses, refreshing tokens and retrying:
 ```typescript
 class UnauthorizedInterceptor implements Interceptor<Response> {
 	// ...
