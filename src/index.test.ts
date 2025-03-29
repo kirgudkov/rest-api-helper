@@ -7,43 +7,46 @@ type Response = {
 };
 
 const transport: Transport<Response> = {
-	async handle() {
+	async perform() {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		return {
 			status: 200,
-			json: async () => ({ foo: "bar" })
+			json: async () => ({ foo: "bar" }),
 		};
-	}
+	},
 };
 
 const interceptor: Interceptor<Response> = {
-	onResponse: jest.fn().mockImplementation(async (_, response, promise) => {
+	onResponse: jest.fn().mockImplementation(async (_, response) => {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 
-		promise.resolve(response);
-	})
+		return response;
+	}),
 };
 
 const baseURL = "https://example.com";
 
 const defaultHeaders = {
 	"content-type": "application/json",
-	"accept": "application/json"
+	"accept": "application/json",
 };
 
-const client = new Client<Response>("https://example.com")
+const client = new Client<Response>(transport, "https://example.com")
 	.setDefaultHeaders(defaultHeaders)
-	.setTransport(transport)
 	.setInterceptor(interceptor);
 
-const request = new Request("get", "/latest/:id")
-	.setSearchParam("amount", 10)
-	.setSearchParam("from", "GBP")
-	.setSearchParam("to", "USD")
-	.setUrlParam("id", 2);
+let request = new Request("get", "/latest/:id");
 
 describe("index", () => {
+	beforeEach(() => {
+		request = new Request("get", "/latest/:id")
+			.setSearchParam("amount", 10)
+			.setSearchParam("from", "GBP")
+			.setSearchParam("to", "USD")
+			.setUrlParam("id", 2);
+	});
+
 	it("should create a client", () => {
 		expect(client).toBeDefined();
 		expect(client.baseURL).toBe(baseURL);
@@ -58,7 +61,6 @@ describe("index", () => {
 	});
 
 	it("should perform a request", async () => {
-
 		const response = await client.perform(request);
 
 		expect(request.url.protocol).toBe("https");

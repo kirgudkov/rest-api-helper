@@ -121,9 +121,7 @@ export class Client<Response> {
 	baseURL: string;
 	defaultHeaders: Headers;
 
-	constructor(baseURL: string);
-
-	setTransport(transport: Transport<Response>): Client<Response>;
+	constructor(transport: Transport<Response>, baseURL: string);
 
 	setInterceptor(interceptor: Interceptor<Response>): Client<Response>;
 
@@ -137,7 +135,7 @@ export class Client<Response> {
  * In here we have to implement the way we want to execute and handle every call whether it is fetch, or XHR or test mock etc.
  */
 export interface Transport<Response> {
-	handle(request: Request): Promise<Response>;
+	perform(request: Request): Promise<Response>;
 }
 
 /**
@@ -147,13 +145,8 @@ export interface Transport<Response> {
  * resolve or reject original Promise
  */
 export interface Interceptor<Response> {
-	onResponse(request: Request, response: Response, promise: OriginalPromise<Response>): Promise<void>;
+	onResponse(request: Request, response: Response, client: Client<Response>): Promise<void>;
 }
-
-type OriginalPromise<T> = {
-	resolve: (value: T) => void;
-	reject: (reason?: unknown) => void;
-};
 
 type Headers = Record<string, string> & {
 	"content-type"?: "application/json" | "application/x-www-form-urlencoded" | "multipart/form-data" | "text/plain" | "text/html" | string;

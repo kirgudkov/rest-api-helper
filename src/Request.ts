@@ -1,16 +1,16 @@
 import { URL } from "./URL";
 
 class Request {
+	signal: AbortSignal | null = null;
+
 	readonly url = new URL();
 	readonly method: string;
 	readonly headers: Record<string, string> = {};
 
-	constructor(method: string, path: string) {
-		this.method = method.toLowerCase();
-		this.url.pathname = path;
-	}
-
-	signal: AbortSignal | null = null;
+	#baseDelayMs: number = 1000;
+	#delayMs: number = 0;
+	#attempt = 0;
+	#maxAttempts: number = 3;
 
 	#isInterceptionAllowed = true;
 	get isInterceptionAllowed() {
@@ -20,6 +20,37 @@ class Request {
 	#body: BodyInit | null = null;
 	get body() {
 		return this.#body;
+	}
+
+	constructor(method: string, path: string) {
+		this.method = method.toLowerCase();
+		this.url.pathname = path;
+	}
+
+	async prepare() {
+		if (this.#attempt >= this.#maxAttempts) {
+			throw new Error("Max attempts reached");
+		}
+
+		await new Promise<void>(resolve => {
+			setTimeout(() => resolve(), this.#delayMs);
+		});
+
+		this.#delayMs = ++this.#attempt * this.#baseDelayMs;
+
+		return this;
+	}
+
+	setMaxAttempts(maxAttempts: number) {
+		this.#maxAttempts = maxAttempts;
+
+		return this;
+	}
+
+	setBaseDelay(baseDelay: number) {
+		this.#baseDelayMs = baseDelay;
+
+		return this;
 	}
 
 	setBaseURL(url: string) {
@@ -101,7 +132,7 @@ class Request {
 	setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>) {
 		if (Array.isArray(value)) {
 			value.forEach(item =>
-				this.url.searchParams.append(key, item.toString())
+				this.url.searchParams.append(key, item.toString()),
 			);
 		} else {
 			this.url.searchParams.append(key, value.toString());
