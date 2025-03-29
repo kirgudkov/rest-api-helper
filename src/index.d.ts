@@ -160,7 +160,7 @@ export interface Transport<Response> {
  * resolve or reject original Promise
  */
 export interface Interceptor<Response> {
-	onResponse(request: Request, response: Response, client: Client<Response>): Promise<void>;
+	onResponse(request: Request, response: Response, client: Client<Response>): Promise<Response>;
 }
 
 type Headers = Record<string, string> & {
