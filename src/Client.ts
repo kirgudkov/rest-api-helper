@@ -44,7 +44,7 @@ class Client<T> {
 
 		const response = await request
 			.prepare()
-			.then(this.#transport.perform);
+			.then(request => this.#transport.perform(request));
 
 		if (!request.isInterceptionAllowed) {
 			return response;
