@@ -253,7 +253,9 @@ Sets the maximum number of attempts for the request. Default is 3.
 
 #### `setBaseDelay(baseDelay: number): Request`
 
-Sets the base delay for the request. Default is 1000ms.
+Sets the base delay in milliseconds between attempts. Each attempt will increase the delay by the base delay multiplied by the attempt number.
+For example, if the base delay is 1000ms and the max attempts is 3, the delays will be: 0ms, 1000ms and 2000ms.
+First attempts is always executed immediately.
 
 - `baseDelay`: a number representing the base delay in milliseconds
 

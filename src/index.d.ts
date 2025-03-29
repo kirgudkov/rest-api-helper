@@ -15,6 +15,21 @@ export class Request {
 	constructor(method: Method, path: string);
 
 	/**
+	 * Set maximum number of attempts to perform the request.
+	 * @returns {Request}
+	 */
+	setMaxAttempts(maxAttempts: number): Request;
+
+	/**
+	 * Sets the base delay in milliseconds between attempts. Each attempt will increase the delay by the base delay multiplied by the attempt number.
+	 * For example, if the base delay is 1000ms and the max attempts is 3, the delays will be: 0ms, 1000ms and 2000ms.
+	 * First attempts is always executed immediately.
+	 * @param baseDelay
+	 * @returns {Request}
+	 */
+	setBaseDelay(baseDelay: number): Request;
+
+	/**
 	 * Appends or overrides existing header by key.
 	 * @param key a header name, case-insensitive
 	 * @param value a header value
