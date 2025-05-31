@@ -18,6 +18,9 @@ const transport: Transport<Response> = {
 };
 
 const interceptor: Interceptor<Response> = {
+	onRequest: jest.fn().mockImplementation((request) => {
+		return request;
+	}),
 	onResponse: jest.fn().mockImplementation(async (_, response) => {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 

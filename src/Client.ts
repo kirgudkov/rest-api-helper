@@ -42,17 +42,26 @@ class Client<T> {
 		request.setBaseURL(this.#baseURL);
 		request.setDefaultHeaders(this.#defaultHeaders);
 
-		const response = await request
+		let _request = request;
+		const response = await _request
 			.prepare()
-			.then(request => this.#transport.perform(request));
+			.then(async _ => {
+				if (_request.isInterceptionAllowed) {
+					for (const interceptor of this.#interceptors) {
+						_request = await interceptor.onRequest(_request, this);
+					}
+				}
 
-		if (!request.isInterceptionAllowed) {
+				return this.#transport.perform(_request);
+			});
+
+		if (!_request.isInterceptionAllowed) {
 			return response;
 		}
 
 		let _response = response;
 		for (const interceptor of this.#interceptors) {
-			_response = await interceptor.onResponse(request, _response, this);
+			_response = await interceptor.onResponse(_request, _response, this);
 		}
 
 		return _response;
@@ -64,6 +73,7 @@ interface Transport<Response> {
 }
 
 interface Interceptor<Response> {
+	onRequest(request: Request, client: Client<Response>): Promise<Request>;
 	onResponse(request: Request, response: Response, client: Client<Response>): Promise<Response>;
 }
 

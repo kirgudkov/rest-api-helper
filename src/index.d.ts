@@ -7,23 +7,23 @@ export class Request {
 	readonly isInterceptionAllowed: boolean;
 
 	/**
-	 * Creates a new request with a path and a method (GET, POST, PUT, DELETE etc).
-	 * @param method a string that represents an HTTP method, e.g. get, post, put, delete. Case-insensitive.
-	 * @param path a string that can contain URL parameters, e.g. /users/:id
-	 * @throws {Error} if path contains duplicate URL parameters
+	 * Creates a new request with a path and a method (GET, POST, PUT, DELETE, etc.).
+	 * @param method a string that represents an HTTP method, e.g., get, post, put, delete. Case-insensitive.
+	 * @param path a string that can contain URL parameters e.g. /users/:id
+	 * @throws {Error} if the path contains duplicate URL parameters
 	 */
 	constructor(method: Method, path: string);
 
 	/**
-	 * Set maximum number of attempts to perform the request.
+	 * Set the maximum number of attempts to perform the request.
 	 * @returns {Request}
 	 */
 	setMaxAttempts(maxAttempts: number): Request;
 
 	/**
 	 * Sets the base delay in milliseconds between attempts. Each attempt will increase the delay by the base delay multiplied by the attempt number.
-	 * For example, if the base delay is 1000ms and the max attempts is 3, the delays will be: 0ms, 1000ms and 2000ms.
-	 * First attempts is always executed immediately.
+	 * For example, if the base delay is 1000 ms and the maxAttempts is 3, the delay values are going to be: 0 ms, 1000 ms and 2000 ms.
+	 * The first attempt is always executed immediately.
 	 * @param baseDelay
 	 * @returns {Request}
 	 */
@@ -44,7 +44,7 @@ export class Request {
 	setHeaders(headers: Headers): Request;
 
 	/**
-	 * Removes a header by key, if it exists.
+	 * Removes a header by key if it exists.
 	 * @param key a header name, case-insensitive
 	 * @returns {Request}
 	 */
@@ -66,7 +66,7 @@ export class Request {
 
 	/**
 	 * Allow or disallow interception of the request. True by default.
-	 * Useful for refresh token requests, when you don't want to catch 401s (in case if your refresh token is expired) and fall into an infinite refreshing loop.
+	 * Useful for refresh token requests, when you don't want to catch 401 (in case if your refresh token is expired) and fall into an infinite refreshing loop.
 	 * @param allowed
 	 * @returns {Request}
 	 */
@@ -97,7 +97,7 @@ export class Request {
 
 	/**
 	 * Set multiple query parameters. It will append the key-value pairs to the URL.
-	 * e.g. setSearchParams({ name: "John", age: 30 }) -> /users?name=John&age=30
+	 * e.g., setSearchParams({ name: "John", age: 30 }) -> /users?name=John&age=30
 	 * or setSearchParams({ names: ["John", "Alice"] }) -> /users?names[]=John&names[]=Alice
 	 * @param params
 	 */
@@ -146,8 +146,8 @@ export class Client<Response> {
 }
 
 /**
- * Defines one single method that will be called by Client to perform network request.
- * In here we have to implement the way we want to execute and handle every call whether it is fetch, or XHR or test mock etc.
+ * Defines one single method that Client will call to perform network request.
+ * In here we have to implement the way we want to execute and handle every call whether it is fetch(), or XHR, or test mock, etc.
  */
 export interface Transport<Response> {
 	perform(request: Request): Promise<Response>;
@@ -155,11 +155,12 @@ export interface Transport<Response> {
 
 /**
  * The Interceptor interface binds you to implement `onResponse` method.
- * Instead of being resolved immediately, original promise will fall through this interceptor pipeline.
- * Inside onResponse implementation we can do whatever we want: check request/response, make additional requests (refresh tokens etc.)
- * resolve or reject original Promise
+ * Instead of being resolved immediately, the original promise will fall through this interceptor pipeline.
+ * Inside onResponse implementation, we can do whatever we want: check request/response, make additional requests (refresh tokens etc.)
+ * resolve or reject the original Promise
  */
 export interface Interceptor<Response> {
+	onRequest(request: Request, client: Client<Response>): Promise<Request>;
 	onResponse(request: Request, response: Response, client: Client<Response>): Promise<Response>;
 }
 

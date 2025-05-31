@@ -8,10 +8,10 @@ yarn add rest-api-helper
 
 # Usage
 
-To perform any request it is required to:
+To perform any request, it is required to:
 
 - Define _transport_ aka the way you're going to communicate
-- Configure _client_ to glue everything together (base url, headers, transport etc)
+- Configure _client_ to glue everything together (base url, headers, transport etc.)
 - Create _request_ object
 
 ---
@@ -33,22 +33,31 @@ class FetchTransport implements Transport<Response> {
 
 ### Interceptor implementation (Optional)
 
-The `Interceptor` interface binds you to implement `onResponse` method.
+The `Interceptor` interface binds you to implement `onRequest` and `onResponse` methods.
 
-Instead of being resolved immediately, original promise will fall through the interceptors pipeline.
+Instead of being called and resolved immediately, the original promise will fall through the chain of interceptors.
+
+Each `onRequest` call comes along with two arguments:
+
+- `request: Request` – request object returned by the previous interceptor or the original request (in case if this is the first interceptor in the chain)
+- `client: Client<T>` - current client instance that is used to perform this request
+
 Each `onResponse` call comes along with three arguments:
 
-- `request: Request` – original request object
-- `response: T` – received response
+- `request: Request` – request object: either the original one or the one modified by the `onRequest` method
+- `response: T` – received response: either the original one (in case if this is the first interceptor in the chain) or the one modified by previous interceptors
 - `client: Client<T>` - original client instance that was used to perform request. Might be useful to retry intercepted or perform another request
 
 It allows you to
 
-- intercept, analyze and modify responses before they are passed down the chain
+- intercept, analyze and modify requests and responses before they are executed and returned
 - retry failed requests
 - perform another requests
+- inject headers, tokens, etc. (though it's recommended to set headers while building the request)
+- logging requests and responses
 
-This might be useful for scenarios like handling 401 statuses, refreshing tokens and retrying:
+For instance, Interceptors might be useful for scenarios like handling 401 statuses, refreshing tokens and retrying:
+
 ```typescript
 class UnauthorizedInterceptor implements Interceptor<Response> {
 	// ...
@@ -139,7 +148,7 @@ Interceptor<T>
 Client<T>
 ```
 
-`T` defines the shape of each response. Since transport object responsible for performing requests, it dictates the response type. In order to be compatible, `Transport`,
+`T` defines the shape of each response. Since a transport object is responsible for performing requests, it dictates the response type. To be compatible, `Transport`,
 `Interceptor` and `Client` should share the same type.
 
 In example described above, we used `fetch` API that is directly returned from `perform` method. Thus, generic type is native `Response`. However, we could easily move response
@@ -184,10 +193,10 @@ class FetchTransport implements Transport<CustomResponse> {
 constructor(method: string, path: string)
 ```
 
-Creates a new request with a path and a method (GET, POST, PUT, DELETE etc.).
+It creates a new request with a path and a method (GET, POST, PUT, DELETE, etc.).
 
 - `path`: a string that follows the base URL - `/users`. Can contain URL parameters, e.g. `/users/:id`
-- `method`: a string that represents an HTTP method, e.g. GET, POST, PUT, DELETE. Case-insensitive.
+- `method`: a string that represents an HTTP method, e.g., GET, POST, PUT, DELETE. Case-insensitive.
 
 Throws `Error` if `path` contains duplicate URL parameters. For example: `/users/:id/devices/:id`
 
@@ -212,7 +221,7 @@ Merges passed record with existing one.
 
 #### `removeHeader(key: string): Request`
 
-Removes a header by key, if it exists.
+It removes a header by the key if it exists.
 
 - `key`: a header name, case-insensitive
 
@@ -220,7 +229,7 @@ Removes a header by key, if it exists.
 
 #### `setBody(data: BodyInit): Request`
 
-Sets the body of the request.
+It sets the body of the request.
 
 - `data`: the request body data
 
@@ -244,7 +253,7 @@ Sets interception flag setting for request. True by default
 
 #### `setMaxAttempts(maxAttempts: number): Request`
 
-Sets the maximum number of attempts for the request. Default is 3.
+It sets the maximum number of attempts for the request. Default is 3.
 
 - `maxAttempts`: a number representing the maximum number of attempts
 
@@ -253,8 +262,8 @@ Sets the maximum number of attempts for the request. Default is 3.
 #### `setBaseDelay(baseDelay: number): Request`
 
 Sets the base delay in milliseconds between attempts. Each attempt will increase the delay by the base delay multiplied by the attempt number.
-For example, if the base delay is 1000ms and the max attempts is 3, the delays will be: 0ms, 1000ms and 2000ms.
-First attempts is always executed immediately.
+For example, if the base delay is 1000 ms and the max attempts count is 3, the delays will be: 0 ms, 1000 ms and 2000 ms.
+The first attempt is always executed immediately.
 
 - `baseDelay`: a number representing the base delay in milliseconds
 
@@ -270,7 +279,7 @@ Sets the `AbortController` for the request so you can manually abort it.
 
 #### `setUrlParam(key: string, value: string | number): Request`
 
-Sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
+It sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
 
 - `key`: parameter key
 - `value`: parameter value
@@ -283,7 +292,7 @@ Sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
 
 #### `setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>): Request`
 
-Sets a query parameter. It will append the key-value pair to the URL.
+It sets a query parameter. It will append the key-value pair to the URL.
 
 - `key`: query parameter key
 - `value`: query parameter value
@@ -343,7 +352,7 @@ Creates a new `Client` instance with a base URL.
 
 #### `setDefaultHeaders(headers: Record<string, string>): Client<Response>`
 
-Sets the default headers for the client.
+It sets the default headers for the client.
 
 - `headers`: an object with key-value pairs representing the default headers
 
@@ -351,7 +360,7 @@ Sets the default headers for the client.
 
 #### `setInterceptor(interceptor: Interceptor<Response>): Client<Response>`
 
-Sets the interceptor for the client.
+It sets the interceptor for the client.
 
 - `interceptor`: an `Interceptor` object implementation
 

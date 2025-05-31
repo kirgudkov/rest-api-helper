@@ -4,6 +4,7 @@ import { Post } from "./Request";
 const url = "http://base.url";
 
 let request = {
+	url: "http://base.url",
 	setBaseURL: jest.fn(),
 	setDefaultHeaders: jest.fn(),
 	isInterceptionAllowed: true,
@@ -21,6 +22,7 @@ describe("Client", () => {
 		};
 
 		request = {
+			url: "http://base.url",
 			setBaseURL: jest.fn(),
 			setDefaultHeaders: jest.fn(),
 			isInterceptionAllowed: true,
@@ -72,6 +74,9 @@ describe("Client", () => {
 		const client = new Client(transport, url);
 
 		const interceptor = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				return request;
+			}),
 			onResponse: jest.fn().mockImplementation((_, response) => {
 				return response;
 			}),
@@ -82,12 +87,16 @@ describe("Client", () => {
 			.perform(request as any);
 
 		expect(interceptor.onResponse).toHaveBeenCalledTimes(1);
+		expect(interceptor.onRequest).toHaveBeenCalledTimes(1);
 	});
 
 	it("interceptor should modify response", async () => {
 		const client = new Client(transport, url);
 
 		const interceptor = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				return request;
+			}),
 			onResponse: jest.fn().mockImplementation(() => {
 				return "modified";
 			}),
@@ -101,6 +110,30 @@ describe("Client", () => {
 		expect(response).toEqual("modified");
 	});
 
+	it("interceptor should modify request", async () => {
+		const client = new Client(transport, url);
+
+		const interceptor = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				request.setBaseURL("http://modified.url");
+				return request;
+			}),
+			onResponse: jest.fn().mockImplementation((response) => {
+				return response;
+			}),
+		};
+
+		client.setInterceptor(interceptor);
+
+		expect(request.setBaseURL).not.toHaveBeenCalled();
+		expect(request.url).toBe("http://base.url");
+
+		await client.perform(request as any);
+
+		expect(interceptor.onRequest).toHaveBeenCalledTimes(1);
+		expect(request.setBaseURL).toHaveBeenCalledWith("http://modified.url");
+	});
+
 	it("should call interceptors in order, chaining responses", async () => {
 		const client = new Client(transport, url);
 		const interceptorsCallOrder: {
@@ -109,6 +142,9 @@ describe("Client", () => {
 		}[] = [];
 
 		const interceptorA = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				return request;
+			}),
 			onResponse: jest.fn().mockImplementation((_, response) => {
 				interceptorsCallOrder.push({
 					response, interceptor: "A",
@@ -119,6 +155,9 @@ describe("Client", () => {
 		};
 
 		const interceptorB = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				return request;
+			}),
 			onResponse: jest.fn().mockImplementation((_, response) => {
 				interceptorsCallOrder.push({
 					response, interceptor: "B",
@@ -150,6 +189,9 @@ describe("Client", () => {
 		transport.perform = jest.fn().mockResolvedValue("failed");
 
 		const interceptor = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				return request;
+			}),
 			onResponse: jest.fn().mockImplementation(async (request, response, client) => {
 				if (response === "failed") {
 					try {
@@ -185,6 +227,9 @@ describe("Client", () => {
 		let attempts = 1;
 
 		const interceptor = {
+			onRequest: jest.fn().mockImplementation((request) => {
+				return request;
+			}),
 			onResponse: jest.fn().mockImplementation(async (request, response, client) => {
 				if (response === "failed") {
 					attempts++;
