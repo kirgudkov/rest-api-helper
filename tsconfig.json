@@ -7,8 +7,5 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true
-  },
-  "include": [
-    "./README.md"
-  ]
+  }
 }
