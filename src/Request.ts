@@ -1,23 +1,24 @@
 import { URL } from "./URL";
 
 class Request {
-	signal: AbortSignal | null = null;
+	signal?: AbortSignal;
 
 	readonly url = new URL();
 	readonly method: string;
 	readonly headers: Record<string, string> = {};
 
 	#baseDelayMs: number = 1000;
-	#delayMs: number = 0;
-	#attempt = 0;
-	#maxAttempts: number = 3;
+	#currentDelayMs: number = 0;
+
+	#currentAttempt = 1;
+	#attemptsCount: number = 3;
 
 	#isInterceptionAllowed = true;
 	get isInterceptionAllowed() {
 		return this.#isInterceptionAllowed;
 	}
 
-	#body: BodyInit | null = null;
+	#body?: BodyInit;
 	get body() {
 		return this.#body;
 	}
@@ -28,21 +29,21 @@ class Request {
 	}
 
 	async prepare() {
-		if (this.#attempt >= this.#maxAttempts) {
+		if (this.#currentAttempt > this.#attemptsCount) {
 			throw new Error("Max attempts reached");
 		}
 
 		await new Promise<void>(resolve => {
-			setTimeout(() => resolve(), this.#delayMs);
+			setTimeout(() => resolve(), this.#currentDelayMs);
 		});
 
-		this.#delayMs = ++this.#attempt * this.#baseDelayMs;
+		this.#currentDelayMs = ++this.#currentAttempt * this.#baseDelayMs;
 
 		return this;
 	}
 
 	setMaxAttempts(maxAttempts: number) {
-		this.#maxAttempts = maxAttempts;
+		this.#attemptsCount = maxAttempts;
 
 		return this;
 	}
