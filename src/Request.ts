@@ -7,11 +7,16 @@ class Request {
 	readonly method: string;
 	readonly headers: Record<string, string> = {};
 
-	#baseDelayMs: number = 1000;
-	#currentDelayMs: number = 0;
+	#baseDelayMs = 1000;
+	#currentDelayMs = 0;
 
 	#currentAttempt = 1;
-	#attemptsCount: number = 3;
+	#attemptsCount = 1;
+
+	#timeout = 0;
+	get timeout() {
+		return this.#timeout;
+	}
 
 	#isInterceptionAllowed = true;
 	get isInterceptionAllowed() {
@@ -42,24 +47,25 @@ class Request {
 		return this;
 	}
 
+	setTimeout(timeout: number) {
+		this.#timeout = timeout;
+		return this;
+	}
+
 	setMaxAttempts(maxAttempts: number) {
 		this.#attemptsCount = maxAttempts;
-
 		return this;
 	}
 
 	setBaseDelay(baseDelay: number) {
 		this.#baseDelayMs = baseDelay;
-
 		return this;
 	}
 
 	setBaseURL(url: string) {
 		const [protocol, host] = url.split("://");
-
 		this.url.protocol = protocol;
 		this.url.host = host;
-
 		return this;
 	};
 
@@ -67,13 +73,11 @@ class Request {
 		for (const [key, value] of Object.entries(headers)) {
 			this.headers[key.toLowerCase()] = value;
 		}
-
 		return this;
 	};
 
 	setHeader(key: string, value: string) {
 		this.headers[key.toLowerCase()] = value;
-
 		return this;
 	};
 
@@ -81,7 +85,6 @@ class Request {
 		if (this.headers[key.toLowerCase()]) {
 			delete this.headers[key.toLowerCase()];
 		}
-
 		return this;
 	};
 
@@ -91,13 +94,11 @@ class Request {
 				this.headers[key.toLowerCase()] = value;
 			}
 		}
-
 		return this;
 	};
 
 	setBody(data: BodyInit) {
 		this.#body = data;
-
 		return this;
 	}
 
@@ -108,25 +109,21 @@ class Request {
 		catch (error) {
 			throw new Error("Request: failed to stringify the body");
 		}
-
 		return this;
 	}
 
 	setUrlParam(key: string, value: string | number) {
 		this.url.pathname = this.url.pathname.replace(`:${key}`, value.toString());
-
 		return this;
 	};
 
 	setInterceptionAllowed(allowed: boolean) {
 		this.#isInterceptionAllowed = allowed;
-
 		return this;
 	}
 
 	setAbortController(abortController: AbortController) {
 		this.signal = abortController.signal;
-
 		return this;
 	}
 
@@ -138,7 +135,6 @@ class Request {
 		} else {
 			this.url.searchParams.append(key, value.toString());
 		}
-
 		return this;
 	};
 
@@ -146,7 +142,6 @@ class Request {
 		for (const [key, value] of Object.entries(params)) {
 			this.setSearchParam(key, value);
 		}
-
 		return this;
 	}
 }

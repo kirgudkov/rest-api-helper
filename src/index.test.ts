@@ -1,5 +1,6 @@
 import { Transport, Interceptor, Client } from "./Client";
 import { Request } from "./Request";
+import { TimeoutError } from "./TimeoutError";
 
 type Response = {
 	status: number;
@@ -7,13 +8,19 @@ type Response = {
 };
 
 const transport: Transport<Response> = {
-	async perform() {
-		await new Promise((resolve) => setTimeout(resolve, 100));
+	async perform(request) {
+		return new Promise((resolve, reject) => {
+			request.signal?.addEventListener("abort", () => {
+				reject(new Error("AbortError"));
+			}, { once: true });
 
-		return {
-			status: 200,
-			json: async () => ({ foo: "bar" }),
-		};
+			setTimeout(() => {
+				resolve({
+					status: 200,
+					json: async () => ({ foo: "bar" }),
+				});
+			}, 100);
+		});
 	},
 };
 
@@ -43,11 +50,13 @@ let request = new Request("get", "/latest/:id");
 
 describe("index", () => {
 	beforeEach(() => {
+		jest.clearAllMocks();
 		request = new Request("get", "/latest/:id")
 			.setSearchParam("amount", 10)
 			.setSearchParam("from", "GBP")
 			.setSearchParam("to", "USD")
-			.setUrlParam("id", 2);
+			.setUrlParam("id", 2)
+			.setTimeout(1000);
 	});
 
 	it("should create a client", () => {
@@ -74,5 +83,29 @@ describe("index", () => {
 
 		expect(response.status).toBe(200);
 		expect(json).toEqual({ foo: "bar" });
+	});
+
+	it("should clear timeout on success", async () => {
+		jest.spyOn(global, "clearTimeout");
+		await client.perform(request);
+		expect(clearTimeout).toHaveBeenCalledTimes(1);
+	});
+
+	it("should clear timeout on abort", async () => {
+		jest.spyOn(global, "clearTimeout");
+		const abortController = new AbortController();
+		request.setAbortController(abortController);
+
+		const performPromise = client.perform(request);
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		abortController.abort();
+
+		await expect(performPromise).rejects.toThrow("AbortError");
+		expect(clearTimeout).toHaveBeenCalledTimes(1);
+	});
+
+	it("should fail with timeout", async () => {
+		request.setTimeout(50);
+		await expect(client.perform(request)).rejects.toThrow(TimeoutError);
 	});
 });

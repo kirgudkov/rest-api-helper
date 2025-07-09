@@ -1,4 +1,5 @@
 import { Request } from "./Request";
+import { TimeoutError } from "./TimeoutError";
 
 class Client<T> {
 
@@ -42,29 +43,47 @@ class Client<T> {
 		request.setBaseURL(this.#baseURL);
 		request.setDefaultHeaders(this.#defaultHeaders);
 
-		let _request = request;
-		const response = await _request
+		let response = await request
 			.prepare()
 			.then(async _ => {
-				if (_request.isInterceptionAllowed) {
+				if (request.isInterceptionAllowed) {
 					for (const interceptor of this.#interceptors) {
-						_request = await interceptor.onRequest(_request, this);
+						request = await interceptor.onRequest(request, this);
 					}
 				}
 
-				return this.#transport.perform(_request);
+				if (request.timeout) {
+					let timeout: NodeJS.Timeout | undefined;
+
+					const timeoutPromise = new Promise<never>((_, reject) => {
+						timeout = setTimeout(() => reject(new TimeoutError()), request.timeout);
+					});
+
+					request.signal?.addEventListener("abort", () => {
+						clearTimeout(timeout);
+					}, { once: true });
+
+					const response = await Promise.race([
+						this.#transport.perform(request),
+						timeoutPromise,
+					]);
+
+					clearTimeout(timeout);
+					return response;
+				}
+
+				return this.#transport.perform(request);
 			});
 
-		if (!_request.isInterceptionAllowed) {
+		if (!request.isInterceptionAllowed) {
 			return response;
 		}
 
-		let _response = response;
 		for (const interceptor of this.#interceptors) {
-			_response = await interceptor.onResponse(_request, _response, this);
+			response = await interceptor.onResponse(request, response, this);
 		}
 
-		return _response;
+		return response;
 	};
 }
 

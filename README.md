@@ -10,20 +10,20 @@ yarn add rest-api-helper
 
 To perform any request, it is required to:
 
-- Define _transport_ aka the way you're going to communicate
-- Configure _client_ to glue everything together (base url, headers, transport etc.)
+- Define _transport_ — the way you're going to communicate
+- Configure _client_ — to glue everything together (base url, headers, transport, etc.)
 - Create _request_ object
 
 ---
 
 ### Transport implementation
 
-The `Transport` interface obliges you to implement method `perform`. It can do whatever you want whether it's `fetch` or `XHR` or `setTimeout` mock. In most cases, you're
+The `Transport` interface requires implementing method `perform`. It can do whatever you want whether it's `fetch` or `XHR` or `setTimeout` mock. In most cases, you're
 probably going to use the fetch API:
 
 ```typescript
 class FetchTransport implements Transport<Response> {
-	perform(request) {
+	perform(request: Request) {
 		return fetch(request.url.href, request);
 	}
 };
@@ -31,9 +31,9 @@ class FetchTransport implements Transport<Response> {
 
 ---
 
-### Interceptor implementation (Optional)
+### Interceptor implementation
 
-The `Interceptor` interface binds you to implement `onRequest` and `onResponse` methods.
+The `Interceptor` interface requires you to implement `onRequest` and `onResponse` methods.
 
 Instead of being called and resolved immediately, the original promise will fall through the chain of interceptors.
 
@@ -50,13 +50,13 @@ Each `onResponse` call comes along with three arguments:
 
 It allows you to
 
-- intercept, analyze and modify requests and responses before they are executed and returned
+- intercept, analyze, and modify requests and responses before they are executed or returned
 - retry failed requests
 - perform another requests
-- inject headers, tokens, etc. (though it's recommended to set headers while building the request)
+- inject headers, tokens, etc.
 - logging requests and responses
 
-For instance, Interceptors might be useful for scenarios like handling 401 statuses, refreshing tokens and retrying:
+For instance, Interceptors are highly useful for scenarios like catching 401 statuses, refreshing JWT tokens, and reattempting failed request:
 
 ```typescript
 class UnauthorizedInterceptor implements Interceptor<Response> {
@@ -82,7 +82,7 @@ class RetryInterceptor implements Interceptor<Response> {
 	async onResponse(request, response, client) {
 		if (!response.ok) {
 			try {
-				// Request counts attempts and throws an error if it exceeds the limit
+				// Request counts attempts itself and throws an error if it exceeds the limit
 				const retryResponse = await client.perform(request);
 
 				if (retryResponse.ok) {
@@ -90,7 +90,7 @@ class RetryInterceptor implements Interceptor<Response> {
 				}
 			}
 			catch (error) {
-				// Maximum attempts reached
+				// Maximum attempts reached, handle error
 			}
 		}
 
@@ -128,19 +128,13 @@ const get = new Get("/latest")
 	.setSearchParam("from", "GBP")
 	.setSearchParam("to", "USD");
 
-
-const request = new Request("get", "/latest")
-	.setSearchParam("amount", 10)
-	.setSearchParam("from", "GBP")
-	.setSearchParam("to", "USD");
-
 const response = await client.perform(request);
 const parsed = await response.json();
 ```
 
 ---
 
-As you might have noticed `Transport`, `Interceptor` and `Client` have generic type arguments:
+As you might have noticed that `Transport`, `Interceptor` and `Client` have generic type parameters:
 
 ```
 Transport<T>
@@ -148,10 +142,10 @@ Interceptor<T>
 Client<T>
 ```
 
-`T` defines the shape of each response. Since a transport object is responsible for performing requests, it dictates the response type. To be compatible, `Transport`,
-`Interceptor` and `Client` should share the same type.
+`T` defines the shape of response. Since a transport is responsible for performing requests, it dictates the response type. To be compatible, `Transport`,
+`Interceptor` and `Client` should share the same generic type parameter.
 
-In example described above, we used `fetch` API that is directly returned from `perform` method. Thus, generic type is native `Response`. However, we could easily move response
+In example described above, we used `fetch` API that is directly returned from `perform` method. Thus, our generic type is native `Response`. However, we could easily move response
 parsing into the transport and replace native `Response` with something like this:
 
 ```typescript
@@ -164,7 +158,7 @@ class FetchTransport implements Transport<CustomResponse> {
 	async perform(request: Request): CustomResponse {
 		const rawResponse = await fetch(request.url, request);
 
-		// or .text() or whatever based on content-type header
+		// or .text() or whatever based on the content-type header
 		const parsedResponse = await rawResponse.json();
 
 		return {
@@ -195,10 +189,10 @@ constructor(method: string, path: string)
 
 It creates a new request with a path and a method (GET, POST, PUT, DELETE, etc.).
 
-- `path`: a string that follows the base URL - `/users`. Can contain URL parameters, e.g. `/users/:id`
 - `method`: a string that represents an HTTP method, e.g., GET, POST, PUT, DELETE. Case-insensitive.
+- `path`: a string that follows the base URL - `/users`. Can contain URL parameters, e.g. `/users/:id`
 
-Throws `Error` if `path` contains duplicate URL parameters. For example: `/users/:id/devices/:id`
+> ⚠️ Throws `Error` if `path` contains duplicate URL parameters. For example: `/users/:id/devices/:id`
 
 ### Methods
 
@@ -213,7 +207,7 @@ Appends or overrides an existing header by key
 
 #### `setHeaders(headers: Record<string, string>): Request`
 
-Merges passed record with existing one.
+Merges passed record with the existing one.
 
 - `headers`: an object with key-value pairs, where key is a header name. Keys are case-insensitive
 
@@ -221,7 +215,7 @@ Merges passed record with existing one.
 
 #### `removeHeader(key: string): Request`
 
-It removes a header by the key if it exists.
+Removes a header by the key if it exists.
 
 - `key`: a header name, case-insensitive
 
@@ -229,7 +223,7 @@ It removes a header by the key if it exists.
 
 #### `setBody(data: BodyInit): Request`
 
-It sets the body of the request.
+Sets the body of the request.
 
 - `data`: the request body data
 
@@ -254,18 +248,29 @@ Sets interception flag setting for request. True by default
 #### `setMaxAttempts(maxAttempts: number): Request`
 
 It sets the maximum number of attempts for the request. Default is 3.
+Note that retries won't run automatically. This property is just a number of how many times the same `Request` instance can be performed, for example, from Interceptor.
+Each attempt is spaced by the `baseDelay` mills.
 
-- `maxAttempts`: a number representing the maximum number of attempts
+- `maxAttempts`: a number representing the maximum allowed number of attempts
 
 ---
 
 #### `setBaseDelay(baseDelay: number): Request`
 
 Sets the base delay in milliseconds between attempts. Each attempt will increase the delay by the base delay multiplied by the attempt number.
-For example, if the base delay is 1000 ms and the max attempts count is 3, the delays will be: 0 ms, 1000 ms and 2000 ms.
+For example, if the base delay is 1000 ms and the max attempts count is 3, the delays will be: 0 ms, 1000 ms, and 2000 ms.
 The first attempt is always executed immediately.
 
 - `baseDelay`: a number representing the base delay in milliseconds
+
+---
+
+#### `setTimeout(timeout: number): Request`
+
+Sets a timeout in milliseconds for a given request. After the specified timeout duration, the request will throw an error.
+The default value is 0. When the value is set to 0 — no timeout applied.
+
+- `timeout`: The duration in milliseconds to wait before the request times out.
 
 ---
 
@@ -279,7 +284,7 @@ Sets the `AbortController` for the request so you can manually abort it.
 
 #### `setUrlParam(key: string, value: string | number): Request`
 
-It sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
+Sets a URL parameter. It will replace the occurrence of `:key` in the URL path.
 
 - `key`: parameter key
 - `value`: parameter value
@@ -292,7 +297,7 @@ It sets a URL parameter. It will replace the occurrence of `:key` in the URL pat
 
 #### `setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>): Request`
 
-It sets a query parameter. It will append the key-value pair to the URL.
+Sets a query parameter. It will append the key-value pair to the URL.
 
 - `key`: query parameter key
 - `value`: query parameter value

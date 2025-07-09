@@ -15,6 +15,14 @@ export class Request {
 	constructor(method: Method, path: string);
 
 	/**
+	 * Sets a timeout for a given operation. After the specified timeout duration in milliseconds, the operation will timeout.
+	 *
+	 * @param {number} timeout - The duration in milliseconds to wait before the operation times out.
+	 * @return {Request} The current instance of the Request object, enabling method chaining.
+	 */
+	setTimeout(timeout: number): Request;
+
+	/**
 	 * Set the maximum number of attempts to perform the request.
 	 * @returns {Request}
 	 */
