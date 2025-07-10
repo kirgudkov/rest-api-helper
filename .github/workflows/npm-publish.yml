@@ -1,13 +1,11 @@
 name: npm-publish
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [ created ]
 
 jobs:
   npm-publish:
-    if: contains(github.event.head_commit.message, 'publish')
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -26,4 +24,4 @@ jobs:
         uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_PUBLISH_SECRET }}
-          tag: latest
+          tag: ${{ contains(github.event.release.tag_name, 'alpha') && 'alpha' || contains(github.event.release.tag_name, 'beta') && 'beta' || contains(github.event.release.tag_name, 'rc') && 'rc' || github.event.release.prerelease && 'next' || 'latest' }}

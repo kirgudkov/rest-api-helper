@@ -1,38 +1,32 @@
 import { Request } from "./Request";
+import { TimeoutError } from "./TimeoutError";
 
 class Client<T> {
 
-  #transport?: Transport<T>;
+  #transport: Transport<T>;
   #interceptors: Interceptor<T>[] = [];
-
 
   #baseURL: string;
   get baseURL() {
     return this.#baseURL;
   }
+
   set baseURL(value) {
     this.#baseURL = value;
   }
 
-
-  #defaultHeaders: Record<string, string>;
+  #defaultHeaders: Record<string, string> = {};
   get defaultHeaders() {
     return this.#defaultHeaders;
   }
+
   set defaultHeaders(value) {
     this.#defaultHeaders = value;
   }
 
-
-  constructor(baseURL: string) {
-    this.#baseURL = baseURL;
-    this.#defaultHeaders = {};
-  }
-
-
-  setTransport(transport: Transport<T>) {
+  constructor(transport: Transport<T>, baseURL: string) {
     this.#transport = transport;
-    return this;
+    this.#baseURL = baseURL;
   }
 
   setDefaultHeaders(headers: Record<string, string>) {
@@ -45,46 +39,61 @@ class Client<T> {
     return this;
   }
 
-  perform(request: Request) {
-
+  async perform(request: Request) {
     request.setBaseURL(this.#baseURL);
     request.setDefaultHeaders(this.#defaultHeaders);
 
-    return new Promise<T>(async (resolve, reject) => {
-      if (!this.#transport) {
-        reject("Transport is not defined");
-        return;
-      }
-
-      try {
-        const response = await this.#transport.handle(request);
-
-        if (!request.isInterceptionAllowed || !this.#interceptors.length) {
-          resolve(response);
-          return;
+    let response = await request
+      .prepare()
+      .then(async _ => {
+        if (request.isInterceptionAllowed) {
+          for (const interceptor of this.#interceptors) {
+            request = await interceptor.onRequest(request, this);
+          }
         }
 
-        this.#interceptors.forEach(interceptor =>
-          interceptor.onResponse(request, response, { resolve, reject })
-        );
-      }
-      catch (error) {
-        reject(error);
-      }
-    });
+        if (request.timeout) {
+          let timeout: NodeJS.Timeout | undefined;
+
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            timeout = setTimeout(() => reject(new TimeoutError()), request.timeout);
+          });
+
+          request.signal?.addEventListener("abort", () => {
+            clearTimeout(timeout);
+          }, { once: true });
+
+          const response = await Promise.race([
+            this.#transport.perform(request),
+            timeoutPromise,
+          ]);
+
+          clearTimeout(timeout);
+          return response;
+        }
+
+        return this.#transport.perform(request);
+      });
+
+    if (!request.isInterceptionAllowed) {
+      return response;
+    }
+
+    for (const interceptor of this.#interceptors) {
+      response = await interceptor.onResponse(request, response, this);
+    }
+
+    return response;
   };
 }
 
 interface Transport<Response> {
-  handle(request: Request): Promise<Response>;
+  perform(request: Request): Promise<Response>;
 }
 
-type OriginalPromise<T> = {
-  resolve: (value: T) => void, reject: (reason?: unknown) => void
-};
-
 interface Interceptor<Response> {
-  onResponse(request: Request, response: Response, promise: OriginalPromise<Response>): Promise<void>;
+  onRequest(request: Request, client: Client<Response>): Promise<Request>;
+  onResponse(request: Request, response: Response, client: Client<Response>): Promise<Response>;
 }
 
 export type { Interceptor, Transport };

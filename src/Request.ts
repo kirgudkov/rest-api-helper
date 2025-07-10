@@ -1,49 +1,83 @@
 import { URL } from "./URL";
 
 class Request {
+  signal?: AbortSignal;
 
+  readonly url = new URL();
   readonly method: string;
   readonly headers: Record<string, string> = {};
-  readonly url = new URL();
+
+  #baseDelayMs = 1000;
+  #currentDelayMs = 0;
+
+  #currentAttempt = 1;
+  #attemptsCount = 1;
+
+  #timeout = 0;
+  get timeout() {
+    return this.#timeout;
+  }
 
   #isInterceptionAllowed = true;
   get isInterceptionAllowed() {
     return this.#isInterceptionAllowed;
   }
 
-  #body: BodyInit | null = null;
+  #body?: BodyInit;
   get body() {
     return this.#body;
   }
 
-  #signal: AbortSignal | null = null;
-
-  constructor(path: string, method: string) {
-    this.url.pathname = path;
+  constructor(method: string, path: string) {
     this.method = method.toLowerCase();
+    this.url.pathname = path;
+  }
+
+  async prepare() {
+    if (this.#currentAttempt > this.#attemptsCount) {
+      throw new Error("Max attempts reached");
+    }
+
+    await new Promise<void>(resolve => {
+      setTimeout(() => resolve(), this.#currentDelayMs);
+    });
+
+    this.#currentDelayMs = ++this.#currentAttempt * this.#baseDelayMs;
+
+    return this;
+  }
+
+  setTimeout(timeout: number) {
+    this.#timeout = timeout;
+    return this;
+  }
+
+  setMaxAttempts(maxAttempts: number) {
+    this.#attemptsCount = maxAttempts;
+    return this;
+  }
+
+  setBaseDelay(baseDelay: number) {
+    this.#baseDelayMs = baseDelay;
+    return this;
   }
 
   setBaseURL(url: string) {
     const [protocol, host] = url.split("://");
-
     this.url.protocol = protocol;
     this.url.host = host;
-
     return this;
   };
 
   setHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(rawKey => {
-      const formattedKey = rawKey.toLowerCase();
-      this.headers[formattedKey] = headers[rawKey];
-    });
-
+    for (const [key, value] of Object.entries(headers)) {
+      this.headers[key.toLowerCase()] = value;
+    }
     return this;
   };
 
   setHeader(key: string, value: string) {
     this.headers[key.toLowerCase()] = value;
-
     return this;
   };
 
@@ -51,25 +85,20 @@ class Request {
     if (this.headers[key.toLowerCase()]) {
       delete this.headers[key.toLowerCase()];
     }
-
     return this;
   };
 
   setDefaultHeaders(headers: Record<string, string>) {
-    Object.keys(headers).forEach(rawKey => {
-      const formattedKey = rawKey.toLowerCase();
-
-      if (!this.headers[formattedKey]) {
-        this.headers[formattedKey] = headers[rawKey];
+    for (const [key, value] of Object.entries(headers)) {
+      if (!this.headers[key.toLowerCase()]) {
+        this.headers[key.toLowerCase()] = value;
       }
-    });
-
+    }
     return this;
   };
 
   setBody(data: BodyInit) {
     this.#body = data;
-
     return this;
   }
 
@@ -80,94 +109,76 @@ class Request {
     catch (error) {
       throw new Error("Request: failed to stringify the body");
     }
-
     return this;
   }
 
   setUrlParam(key: string, value: string | number) {
     this.url.pathname = this.url.pathname.replace(`:${key}`, value.toString());
-
     return this;
   };
 
   setInterceptionAllowed(allowed: boolean) {
     this.#isInterceptionAllowed = allowed;
-
     return this;
   }
 
   setAbortController(abortController: AbortController) {
-    this.#signal = abortController.signal;
-
+    this.signal = abortController.signal;
     return this;
   }
 
   setSearchParam(key: string, value: string | number | boolean | Array<string | number | boolean>) {
     if (Array.isArray(value)) {
-      value.forEach((item) => {
-        this.url.searchParams.append(key, item.toString());
-      });
-
-      return this;
+      value.forEach(item =>
+        this.url.searchParams.append(key, item.toString()),
+      );
+    } else {
+      this.url.searchParams.append(key, value.toString());
     }
-
-    this.url.searchParams.append(key, value.toString());
-
     return this;
   };
 
   setSearchParams(params: Record<string, string | number | boolean | Array<string | number | boolean>>) {
-    Object.keys(params).forEach(key => {
-      const value = params[key];
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          this.url.searchParams.append(key, item.toString());
-        });
-
-        return;
-      }
-
-      this.url.searchParams.append(key, value.toString());
-    });
-
+    for (const [key, value] of Object.entries(params)) {
+      this.setSearchParam(key, value);
+    }
     return this;
   }
 }
 
 class Get extends Request {
   constructor(path: string) {
-    super(path, "get");
+    super("get", path);
   }
 }
 
 class Post extends Request {
   constructor(path: string) {
-    super(path, "post");
+    super("post", path);
   }
 }
 
 class Put extends Request {
   constructor(path: string) {
-    super(path, "put");
+    super("put", path);
   }
 }
 
 class Delete extends Request {
   constructor(path: string) {
-    super(path, "delete");
+    super("delete", path);
   }
 }
 
 class Patch extends Request {
   constructor(path: string) {
-    super(path, "patch");
+    super("patch", path);
   }
 }
 
 class Head extends Request {
   constructor(path: string) {
-    super(path, "head");
+    super("head", path);
   }
 }
 
