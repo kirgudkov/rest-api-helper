@@ -1,5 +1,5 @@
 export class TimeoutError extends Error {
-	constructor() {
-		super("Timeout");
-	}
+  constructor() {
+    super("Timeout");
+  }
 }
